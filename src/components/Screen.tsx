@@ -8,10 +8,13 @@ import { useSettings } from '@/state/settings';
 import { colors, TOUCH } from '@/theme';
 import { AppText } from './AppText';
 import { CinematicBackground } from './CinematicBackground';
+import { GoldDivider } from './GoldDivider';
 import { PressableScale } from './PressableScale';
 
 type Props = {
   title?: string;
+  /** Small line under the title, above the content. */
+  subtitle?: string;
   back?: boolean | (() => void);
   right?: ReactNode;
   /** Shown in the leading slot when there is no back button. */
@@ -33,7 +36,7 @@ export function IconButton({ icon, onPress, label }: { icon: keyof typeof Ionico
   );
 }
 
-export function Screen({ title, back, right, left, children, footer, scroll = true, glow, gradient, particles }: Props) {
+export function Screen({ title, subtitle, back, right, left, children, footer, scroll = true, glow, gradient, particles }: Props) {
   const insets = useSafeAreaInsets();
   const { dir, s } = useSettings();
 
@@ -46,9 +49,16 @@ export function Screen({ title, back, right, left, children, footer, scroll = tr
   const header = (title || back || right || left) && (
     <View style={[styles.header, { flexDirection: dir.row }]}>
       <View style={styles.side}>{back ? <IconButton icon={dir.isRTL ? 'chevron-forward' : 'chevron-back'} onPress={goBack} label={s.goBack} /> : left}</View>
-      <AppText variant="heading" center numberOfLines={1} style={styles.title} accessibilityRole="header">
-        {title}
-      </AppText>
+      <View style={styles.title}>
+        {title ? (
+          <>
+            <AppText variant="title" center numberOfLines={1} color="#F1D69A" accessibilityRole="header">
+              {title}
+            </AppText>
+            <GoldDivider width={150} />
+          </>
+        ) : null}
+      </View>
       <View style={[styles.side, { alignItems: 'flex-end' }]}>{right}</View>
     </View>
   );
@@ -59,6 +69,11 @@ export function Screen({ title, back, right, left, children, footer, scroll = tr
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={[styles.flex, { paddingTop: insets.top + 6 }]}>
           {header}
+          {subtitle ? (
+            <AppText variant="caption" center color={colors.text} style={styles.subtitle}>
+              {subtitle}
+            </AppText>
+          ) : null}
           {scroll ? (
             <ScrollView
               style={styles.flex}
@@ -83,7 +98,8 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   header: { alignItems: 'center', paddingHorizontal: 12, minHeight: TOUCH + 4 },
   side: { minWidth: TOUCH + 8 },
-  title: { flex: 1 },
+  title: { flex: 1, alignItems: 'center' },
+  subtitle: { paddingHorizontal: 24, paddingBottom: 6, fontSize: 13 },
   iconBtn: {
     width: TOUCH,
     height: TOUCH,

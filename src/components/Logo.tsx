@@ -1,62 +1,65 @@
 import { StyleSheet, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 
 import { ltrRow } from '@/i18n/direction';
+import { strings } from '@/i18n/strings';
 import { useSettings } from '@/state/settings';
 import { colors, fonts } from '@/theme';
 import { AppText } from './AppText';
 
-/** Wordmark: "STORYVERSE" in Cinzel with a glowing "AI" seal and gold rule. */
-export function Logo({ size = 34, tagline = true }: { size?: number; tagline?: boolean }) {
+function Crest({ width }: { width: number }) {
+  return (
+    <Svg width={width} height={18} viewBox="0 0 120 18">
+      <Path d="M60 1 L65 9 L60 17 L55 9 Z" fill={colors.gold} />
+      <Path d="M48 9 Q54 3 58 9 M72 9 Q66 3 62 9" stroke={colors.gold} strokeWidth={1} fill="none" />
+      <Path d="M8 9 H46 M74 9 H112" stroke={colors.goldDim} strokeWidth={0.8} />
+    </Svg>
+  );
+}
+
+/** Wordmark: crest, "STORYVERSE" in Cinzel, flanked "AI", and the tagline in both languages. */
+export function Logo({ size = 40, tagline = true }: { size?: number; tagline?: boolean }) {
   const { s, settings } = useSettings();
+  const other = settings.uiLanguage === 'ar' ? 'en' : 'ar';
   return (
     <View style={styles.wrap} accessible accessibilityRole="header" accessibilityLabel={`${s.appName}. ${s.tagline}`}>
-      <View style={[styles.row, { flexDirection: ltrRow() }]}>
-        <AppText lang="en" variant="display" style={[styles.word, { fontSize: size, lineHeight: size * 1.25 }]} color={colors.gold}>
-          STORYVERSE
+      <Crest width={size * 3.2} />
+      <AppText lang="en" variant="display" center color="#F1D69A" style={[styles.word, { fontSize: size, lineHeight: size * 1.18 }]}>
+        STORYVERSE
+      </AppText>
+      <View style={[styles.aiRow, { flexDirection: ltrRow() }]}>
+        <View style={styles.aiLine} />
+        <AppText lang="en" variant="label" color={colors.gold} style={{ fontFamily: fonts.display, fontSize: size * 0.42 }}>
+          AI
         </AppText>
-        <View style={styles.seal}>
-          <AppText lang="en" variant="label" color={colors.text} style={{ fontFamily: fonts.display, fontSize: size * 0.36 }}>
-            AI
-          </AppText>
-        </View>
-      </View>
-      <View style={styles.rule}>
-        <View style={styles.line} />
-        <View style={styles.diamond} />
-        <View style={styles.line} />
+        <View style={styles.aiLine} />
       </View>
       {tagline && (
-        <AppText variant="body" center color={colors.textDim} style={settings.uiLanguage === 'en' && styles.tagline}>
-          {s.tagline}
-        </AppText>
+        <View style={styles.taglines}>
+          <AppText variant={settings.uiLanguage === 'ar' ? 'heading' : 'body'} center color={colors.text} style={[styles.shadow, settings.uiLanguage === 'en' && styles.enTagline]}>
+            {s.tagline}
+          </AppText>
+          <AppText variant="caption" center lang={other} color={colors.textDim} style={[styles.shadow, other === 'en' && styles.italic]}>
+            {strings[other].tagline}
+          </AppText>
+        </View>
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { alignItems: 'center', gap: 6 },
-  // The wordmark is Latin in both languages, so it never flips.
-  row: { alignItems: 'center', gap: 8 },
+  wrap: { alignItems: 'center', gap: 2 },
   word: {
-    textShadowColor: 'rgba(214,180,119,0.7)',
-    textShadowRadius: 14,
-    textShadowOffset: { width: 0, height: 0 },
+    letterSpacing: 2,
+    textShadowColor: 'rgba(0,0,0,0.85)',
+    textShadowRadius: 12,
+    textShadowOffset: { width: 0, height: 2 },
   },
-  seal: {
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 6,
-    backgroundColor: colors.purple,
-    borderWidth: 1,
-    borderColor: colors.gold,
-    shadowColor: colors.purple,
-    shadowOpacity: 1,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 0 },
-  },
-  rule: { flexDirection: 'row', alignItems: 'center', gap: 8, width: 220 },
-  line: { flex: 1, height: 1, backgroundColor: colors.goldDim },
-  diamond: { width: 8, height: 8, backgroundColor: colors.gold, transform: [{ rotate: '45deg' }] },
-  tagline: { fontStyle: 'italic' },
+  aiRow: { alignItems: 'center', gap: 10, marginTop: -4 },
+  aiLine: { width: 46, height: 1, backgroundColor: colors.gold },
+  taglines: { alignItems: 'center', marginTop: 6, gap: 2 },
+  shadow: { textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 8, textShadowOffset: { width: 0, height: 1 } },
+  italic: { fontStyle: 'italic' },
+  enTagline: { fontStyle: 'italic', fontSize: 17 },
 });

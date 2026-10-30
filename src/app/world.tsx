@@ -1,68 +1,48 @@
-import { Ionicons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { AppText } from '@/components/AppText';
-import { WorldArt } from '@/components/art/WorldArt';
 import { Field } from '@/components/Field';
-import { GoldButton } from '@/components/GoldButton';
+import { HeroButton } from '@/components/HeroButton';
 import { OrnateCard } from '@/components/OrnateCard';
 import { PressableScale } from '@/components/PressableScale';
 import { Screen } from '@/components/Screen';
+import { WorldCard } from '@/components/WorldCard';
 import { findWorld, WORLDS } from '@/data/catalog';
 import { useDraft } from '@/state/draft';
 import { useSettings } from '@/state/settings';
-import { colors, radius } from '@/theme';
+import { colors } from '@/theme';
+
+const GUTTER = 18; // matches Screen content padding
+const GAP = 12;
 
 export default function WorldScreen() {
   const { s, settings, dir, calm } = useSettings();
   const { draft, patch } = useDraft();
-  const lang = settings.uiLanguage;
+  const { width } = useWindowDimensions();
   const w = draft.world;
   const selected = w.kind === 'preset' ? findWorld(w.id) : undefined;
   const custom = w.kind === 'custom';
   const valid = !custom || w.description.trim().length > 0;
+  const cardWidth = Math.floor((Math.min(width, 560) - GUTTER * 2 - GAP) / 2) - 1;
 
   return (
     <Screen
       title={s.worldTitle}
+      subtitle={s.worldSubtitle}
       back
       glow={selected?.accent ?? colors.purple}
-      footer={<GoldButton label={s.continue} icon={dir.isRTL ? 'arrow-back' : 'arrow-forward'} disabled={!valid} onPress={() => router.push('/setup')} />}
+      footer={<HeroButton label={s.continue} sub={selected ? selected.name[settings.uiLanguage] : undefined} disabled={!valid} onPress={() => router.push('/setup')} />}
     >
-      {WORLDS.map((world, i) => {
-        const on = selected?.id === world.id;
-        return (
+      <View style={[styles.grid, { flexDirection: dir.row }]}>
+        {WORLDS.map((world, i) => (
           <Animated.View key={world.id} entering={calm ? undefined : FadeInDown.delay(i * 60).duration(400)}>
-            <PressableScale
-              onPress={() => patch({ world: { kind: 'preset', id: world.id } })}
-              accessibilityRole="radio"
-              accessibilityState={{ checked: on }}
-              accessibilityLabel={`${world.name[lang]}. ${world.description[lang]}`}
-              scaleTo={0.98}
-            >
-              <OrnateCard active={on} accent={world.accent} corners={on} style={styles.card}>
-                <WorldArt id={world.id} gradient={world.gradient} accent={world.accent} style={styles.art} />
-                <View style={styles.body}>
-                  <View style={[styles.titleRow, { flexDirection: dir.row }]}>
-                    <AppText variant="heading" style={styles.flex} color={on ? world.accent : colors.text}>
-                      {world.name[lang]}
-                    </AppText>
-                    {on && <Ionicons name="checkmark-circle" size={22} color={world.accent} />}
-                  </View>
-                  <AppText variant="caption" color={colors.gold}>
-                    {world.mood[lang]}
-                  </AppText>
-                  <AppText variant="body" color={colors.textDim}>
-                    {world.description[lang]}
-                  </AppText>
-                </View>
-              </OrnateCard>
-            </PressableScale>
+            <WorldCard world={world} width={cardWidth} selected={selected?.id === world.id} onPress={() => patch({ world: { kind: 'preset', id: world.id } })} />
           </Animated.View>
-        );
-      })}
+        ))}
+      </View>
 
       <PressableScale
         onPress={() => !custom && patch({ world: { kind: 'custom', description: '' } })}
@@ -71,12 +51,17 @@ export default function WorldScreen() {
         accessibilityLabel={s.customWorld}
         scaleTo={0.98}
       >
-        <OrnateCard active={custom} accent={colors.purple} style={styles.customCard}>
-          <View style={[styles.titleRow, { flexDirection: dir.row }]}>
-            <Ionicons name="create-outline" size={22} color={custom ? colors.purple : colors.gold} />
-            <AppText variant="heading" style={styles.flex}>
-              {s.customWorld}
-            </AppText>
+        <OrnateCard active={custom} accent={colors.gold} style={styles.customCard}>
+          <View style={[styles.customRow, { flexDirection: dir.row }]}>
+            <View style={styles.medal}>
+              <MaterialCommunityIcons name="feather" size={22} color={colors.gold} />
+            </View>
+            <View style={styles.flex}>
+              <AppText variant="heading" color={custom ? colors.gold : colors.text}>
+                {s.customWorld}
+              </AppText>
+              <AppText variant="caption">{s.customWorldPlaceholder}</AppText>
+            </View>
           </View>
           {custom && (
             <Field
@@ -96,10 +81,9 @@ export default function WorldScreen() {
 }
 
 const styles = StyleSheet.create({
-  card: { padding: 0, overflow: 'hidden' },
-  art: { height: 96, borderTopLeftRadius: radius.md, borderTopRightRadius: radius.md },
-  body: { padding: 14, gap: 4 },
-  titleRow: { alignItems: 'center', gap: 10 },
-  flex: { flex: 1 },
+  grid: { flexWrap: 'wrap', gap: GAP, justifyContent: 'center' },
   customCard: { gap: 12 },
+  customRow: { alignItems: 'center', gap: 12 },
+  medal: { width: 44, height: 44, borderRadius: 22, borderWidth: 1.2, borderColor: colors.gold, alignItems: 'center', justifyContent: 'center' },
+  flex: { flex: 1 },
 });

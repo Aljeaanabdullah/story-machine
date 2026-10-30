@@ -1,0 +1,17 @@
+[
+  { "slot": "home-hero", "size": "1080x1600 (portrait 2:3)", "subject": "Hooded storyteller holding a glowing orb with a castle inside; moonlit fantasy kingdom behind. Leave the top third darker for the logo." },
+  { "slot": "world-lost-island", "size": "960x720 (4:3)", "subject": "Tropical island with cliffs, waterfalls, ancient ruins, turquoise sea." },
+  { "slot": "world-enchanted-forest", "size": "960x720 (4:3)", "subject": "Giant glowing tree, violet magical forest, fireflies, lantern path." },
+  { "slot": "world-ancient-kingdom", "size": "960x720 (4:3)", "subject": "Golden-hour castle city with spires on a cliff." },
+  { "slot": "world-cyberpunk-city", "size": "960x720 (4:3)", "subject": "Neon skyscrapers at night, blue and magenta lights, rain haze." },
+  { "slot": "world-desert-secrets", "size": "960x720 (4:3)", "subject": "Sunset desert ruins, sand dunes, carved stone gateway." },
+  { "slot": "world-space-frontier", "size": "960x720 (4:3)", "subject": "Alien planet surface, ringed moons, spaceship, starfield." },
+  { "slot": "world-haunted-mansion", "size": "960x720 (4:3)", "subject": "Gothic mansion under a pale moon, mist, one lit window (spooky, not gory)." },
+  { "slot": "world-underwater-kingdom", "size": "960x720 (4:3)", "subject": "Coral palace under the sea, light rays, bubbles, glowing pearls." },
+  { "slot": "hero-warrior", "size": "900x1200 (portrait 3:4)", "subject": "Armored knight with sword and shield, dramatic rim light, dark background." },
+  { "slot": "hero-mage", "size": "900x1200 (portrait 3:4)", "subject": "Robed mage holding a glowing staff, arcane runes in the air." },
+  { "slot": "hero-explorer", "size": "900x1200 (portrait 3:4)", "subject": "Cloaked explorer with map and compass, wind-swept, torchlight." },
+  { "slot": "hero-detective", "size": "900x1200 (portrait 3:4)", "subject": "Hooded detective with a lantern and magnifying glass, foggy street." },
+  { "slot": "hero-sailor", "size": "900x1200 (portrait 3:4)", "subject": "Gulf pearl-diver sailor on a dhow deck, rope and lantern, night sea." },
+  { "slot": "hero-inventor", "size": "900x1200 (portrait 3:4)", "subject": "Inventor with brass goggles and a glowing mechanical gauntlet, workshop sparks." }
+]

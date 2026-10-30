@@ -42,7 +42,8 @@
         {
           "supportsRTL": false
         }
-      ]
+      ],
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true

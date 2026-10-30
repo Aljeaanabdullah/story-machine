@@ -5,13 +5,15 @@ export type Localized = Record<Language, string>;
 
 export type ArchetypeId = 'warrior' | 'mage' | 'explorer' | 'detective' | 'sailor' | 'inventor';
 
-export const ARCHETYPES: { id: ArchetypeId; name: Localized; blurb: Localized; color: string }[] = [
-  { id: 'warrior', name: { en: 'Warrior', ar: 'محارب' }, blurb: { en: 'Steel and courage', ar: 'فولاذ وشجاعة' }, color: colors.fire },
-  { id: 'mage', name: { en: 'Mage', ar: 'ساحر' }, blurb: { en: 'Arcane mastery', ar: 'إتقان السحر' }, color: colors.purple },
-  { id: 'explorer', name: { en: 'Explorer', ar: 'مستكشف' }, blurb: { en: 'Maps the unknown', ar: 'يرسم المجهول' }, color: colors.success },
-  { id: 'detective', name: { en: 'Detective', ar: 'محقق' }, blurb: { en: 'Sees what others miss', ar: 'يرى ما لا يراه غيره' }, color: colors.gold },
-  { id: 'sailor', name: { en: 'Sailor', ar: 'بحّار' }, blurb: { en: 'Reads the tides', ar: 'يقرأ المد والجزر' }, color: colors.blue },
-  { id: 'inventor', name: { en: 'Inventor', ar: 'مخترع' }, blurb: { en: 'Builds the impossible', ar: 'يصنع المستحيل' }, color: '#E26BD6' },
+export type MCIcon = 'sword' | 'magic-staff' | 'compass-outline' | 'eye-outline' | 'anchor' | 'cog-outline' | 'waves' | 'leaf' | 'crown' | 'city-variant' | 'pyramid' | 'orbit' | 'ghost-outline' | 'fish';
+
+export const ARCHETYPES: { id: ArchetypeId; name: Localized; blurb: Localized; color: string; icon: MCIcon }[] = [
+  { id: 'warrior', icon: 'sword', name: { en: 'Warrior', ar: 'محارب' }, blurb: { en: 'Steel and courage', ar: 'فولاذ وشجاعة' }, color: colors.fire },
+  { id: 'mage', icon: 'magic-staff', name: { en: 'Mage', ar: 'ساحر' }, blurb: { en: 'Arcane mastery', ar: 'إتقان السحر' }, color: colors.purple },
+  { id: 'explorer', icon: 'compass-outline', name: { en: 'Explorer', ar: 'مستكشف' }, blurb: { en: 'Maps the unknown', ar: 'يرسم المجهول' }, color: colors.success },
+  { id: 'detective', icon: 'eye-outline', name: { en: 'Detective', ar: 'محقق' }, blurb: { en: 'Sees what others miss', ar: 'يرى ما لا يراه غيره' }, color: colors.gold },
+  { id: 'sailor', icon: 'anchor', name: { en: 'Sailor', ar: 'بحّار' }, blurb: { en: 'Reads the tides', ar: 'يقرأ المد والجزر' }, color: colors.blue },
+  { id: 'inventor', icon: 'cog-outline', name: { en: 'Inventor', ar: 'مخترع' }, blurb: { en: 'Builds the impossible', ar: 'يصنع المستحيل' }, color: '#E26BD6' },
 ];
 
 export const PERSONALITIES: { id: string; name: Localized }[] = [
@@ -40,11 +42,16 @@ export type World = {
   mood: Localized;
   gradient: [string, string, string];
   accent: string;
+  icon: MCIcon;
+  /** One-line hook shown on the world card. */
+  tagline: Localized;
 };
 
 export const WORLDS: World[] = [
   {
     id: 'lost-island',
+    icon: 'waves',
+    tagline: { en: 'Ancient secrets wait to be found', ar: 'أسرار قديمة تنتظر من يكتشفها' },
     name: { en: 'Lost Island', ar: 'الجزيرة المفقودة' },
     description: { en: 'Mist-wrapped shores, ancient ruins and a volcano that hums at night.', ar: 'شواطئ يلفّها الضباب، وأطلال قديمة، وبركان يهمهم ليلًا.' },
     mood: { en: 'Wild · Mysterious', ar: 'برّي · غامض' },
@@ -53,6 +60,8 @@ export const WORLDS: World[] = [
   },
   {
     id: 'enchanted-forest',
+    icon: 'leaf',
+    tagline: { en: 'Mysterious creatures, ancient magic', ar: 'مخلوقات غامضة وسحر قديم' },
     name: { en: 'Enchanted Forest', ar: 'الغابة المسحورة' },
     description: { en: 'Glowing mushrooms, whispering trees and paths that rearrange themselves.', ar: 'فطر متوهّج وأشجار تهمس ودروب تعيد ترتيب نفسها.' },
     mood: { en: 'Magical · Whimsical', ar: 'سحري · حالم' },
@@ -61,6 +70,8 @@ export const WORLDS: World[] = [
   },
   {
     id: 'ancient-kingdom',
+    icon: 'crown',
+    tagline: { en: 'Mighty realms and royal feuds', ar: 'ممالك عظيمة وصراعات ملكية' },
     name: { en: 'Ancient Kingdom', ar: 'المملكة القديمة' },
     description: { en: 'Golden spires, royal intrigue and a crown that chooses its bearer.', ar: 'أبراج ذهبية ومكائد ملكية وتاج يختار حامله.' },
     mood: { en: 'Epic · Regal', ar: 'ملحمي · ملكي' },
@@ -69,6 +80,8 @@ export const WORLDS: World[] = [
   },
   {
     id: 'cyberpunk-city',
+    icon: 'city-variant',
+    tagline: { en: 'Advanced tech, new worlds', ar: 'تقنية متقدمة وعوالم جديدة' },
     name: { en: 'Cyberpunk City', ar: 'مدينة السايبربانك' },
     description: { en: 'Neon rain, rogue AIs and towers that scrape a poisoned sky.', ar: 'مطر نيون وذكاء اصطناعي متمرّد وأبراج تخدش سماءً مسمومة.' },
     mood: { en: 'Electric · Tense', ar: 'كهربائي · متوتر' },
@@ -77,6 +90,8 @@ export const WORLDS: World[] = [
   },
   {
     id: 'desert-secrets',
+    icon: 'pyramid',
+    tagline: { en: 'Treasures lost in the sands of time', ar: 'كنوز مفقودة في رمال الزمن' },
     name: { en: 'Desert of Secrets', ar: 'صحراء الأسرار' },
     description: { en: 'Shifting dunes, buried cities and stars that point the way home.', ar: 'كثبان متحركة ومدن مدفونة ونجوم تدلّ على طريق العودة.' },
     mood: { en: 'Vast · Ancient', ar: 'شاسع · عتيق' },
@@ -85,6 +100,8 @@ export const WORLDS: World[] = [
   },
   {
     id: 'space-frontier',
+    icon: 'orbit',
+    tagline: { en: 'Adventures among the stars', ar: 'مغامرات بين النجوم والمجرات' },
     name: { en: 'Space Frontier', ar: 'تخوم الفضاء' },
     description: { en: 'Derelict stations, uncharted planets and signals from the void.', ar: 'محطات مهجورة وكواكب مجهولة وإشارات من الفراغ.' },
     mood: { en: 'Cosmic · Lonely', ar: 'كوني · موحش' },
@@ -93,6 +110,8 @@ export const WORLDS: World[] = [
   },
   {
     id: 'haunted-mansion',
+    icon: 'ghost-outline',
+    tagline: { en: 'Every door hides a whisper', ar: 'خلف كل باب همسة' },
     name: { en: 'Haunted Mansion', ar: 'القصر المسكون' },
     description: { en: 'Creaking halls, portraits that watch and a door that was never there.', ar: 'ممرات تصرّ ولوحات تراقب وباب لم يكن موجودًا قط.' },
     mood: { en: 'Eerie · Gothic', ar: 'مخيف · قوطي' },
@@ -101,6 +120,8 @@ export const WORLDS: World[] = [
   },
   {
     id: 'underwater-kingdom',
+    icon: 'fish',
+    tagline: { en: 'Songs echoing from the deep', ar: 'أغانٍ يتردد صداها من الأعماق' },
     name: { en: 'Underwater Kingdom', ar: 'مملكة الأعماق' },
     description: { en: 'Coral palaces, pearl divers and songs that echo through the deep.', ar: 'قصور مرجانية وغوّاصو لؤلؤ وأغانٍ يتردد صداها في الأعماق.' },
     mood: { en: 'Serene · Deep', ar: 'هادئ · عميق' },

@@ -62,6 +62,8 @@ const styles = StyleSheet.create({
   labelRow: { alignItems: 'center', gap: 8 },
   rune: { width: 7, height: 7, backgroundColor: colors.gold, transform: [{ rotate: '45deg' }] },
   input: {
+    // The gold focus border replaces the browser's default outline on web.
+    ...({ outlineStyle: 'none' } as object),
     minHeight: 50,
     borderWidth: 1,
     borderRadius: radius.sm,
