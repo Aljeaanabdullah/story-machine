@@ -105,8 +105,10 @@ type Props = {
 function WorldArtBase({ id, gradient, accent, style }: Props) {
   return (
     <View style={[styles.wrap, style]} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-      <LinearGradient colors={gradient} style={StyleSheet.absoluteFill} />
-      <Svg width="100%" height="100%" viewBox="0 0 200 100" preserveAspectRatio="xMidYMax slice">
+      {/* Dark sky fading to a lit horizon so the dark silhouettes read clearly. */}
+      <LinearGradient colors={[gradient[2], gradient[0], gradient[1]]} locations={[0, 0.55, 1]} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={['transparent', `${accent}55`]} start={{ x: 0.5, y: 0.4 }} end={{ x: 0.5, y: 1 }} style={StyleSheet.absoluteFill} />
+      <Svg style={StyleSheet.absoluteFill} width="100%" height="100%" viewBox="0 0 200 100" preserveAspectRatio="xMidYMid slice">
         <Motif id={id} accent={accent} />
       </Svg>
     </View>
