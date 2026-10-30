@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { art } from '@/assets/art';
 import { ArtFrame } from '@/components/art/ArtFrame';
 import { HoodedSeer } from '@/components/art/HoodedSeer';
 import { NightVista } from '@/components/art/NightVista';
@@ -29,6 +30,12 @@ export default function Home() {
   const otherLang = settings.uiLanguage === 'ar' ? 'en' : 'ar';
 
   const resumable = useMemo(() => stories.find((st) => st.saved && st.mode === 'adventure' && !st.adventure?.finished), [stories]);
+  const [logoBottom, setLogoBottom] = useState(insets.top + 260);
+  const painted = !!art('home-hero');
+  // Painted hero (1080×1600): fit the width and start it just under the logo so the
+  // storyteller's hood (≈16% down the image) is never hidden behind the wordmark.
+  const paintedH = width * (1600 / 1080);
+  const paintedTop = Math.max(logoBottom + 40 - paintedH * 0.16, 0);
   const artHeight = Math.max(height * 0.74, 560);
   const seer = Math.min(width * 0.86, 380);
   const enter = (delay: number) => (calm ? undefined : FadeInDown.delay(delay).duration(650));
@@ -37,9 +44,11 @@ export default function Home() {
     <View style={styles.root}>
       <ArtFrame
         slot="home-hero"
-        style={[styles.art, { height: artHeight }]}
+        style={[styles.art, painted ? { top: paintedTop, height: paintedH } : { height: artHeight }]}
         fadeTop
         fadeBottom
+        fadeTopSize={painted ? '22%' : '38%'}
+        fadeBottomSize={painted ? '30%' : '38%'}
         contentPosition="top"
         fallback={
           <>
@@ -65,7 +74,11 @@ export default function Home() {
           <LanguageToggle />
         </View>
 
-        <Animated.View entering={calm ? undefined : FadeIn.duration(900)} style={styles.logo}>
+        <Animated.View
+          entering={calm ? undefined : FadeIn.duration(900)}
+          style={styles.logo}
+          onLayout={(e) => setLogoBottom(e.nativeEvent.layout.y + e.nativeEvent.layout.height)}
+        >
           <Logo size={Math.min(44, width * 0.105)} />
         </Animated.View>
 

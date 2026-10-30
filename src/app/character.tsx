@@ -93,7 +93,7 @@ export default function CharacterScreen() {
           <AppText variant="title" center color="#F1D69A" numberOfLines={1} style={styles.plateName}>
             {c.name.trim() || arch.name[lang]}
           </AppText>
-          <AppText variant="label" center color={arch.color}>
+          <AppText variant="label" center color={arch.color} style={styles.plateName}>
             {nameOk ? `${arch.name[lang]} · ${personality?.name[lang]}` : personality?.name[lang]}
           </AppText>
         </View>

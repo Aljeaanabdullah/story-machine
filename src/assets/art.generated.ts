@@ -2,4 +2,19 @@
 import type { ArtSlot } from './slots';
 
 export const ART: Partial<Record<ArtSlot, number>> = {
+  'home-hero': require('../../assets/art/home-hero.webp'),
+  'world-lost-island': require('../../assets/art/world-lost-island.webp'),
+  'world-enchanted-forest': require('../../assets/art/world-enchanted-forest.webp'),
+  'world-ancient-kingdom': require('../../assets/art/world-ancient-kingdom.webp'),
+  'world-cyberpunk-city': require('../../assets/art/world-cyberpunk-city.webp'),
+  'world-desert-secrets': require('../../assets/art/world-desert-secrets.webp'),
+  'world-space-frontier': require('../../assets/art/world-space-frontier.webp'),
+  'world-haunted-mansion': require('../../assets/art/world-haunted-mansion.webp'),
+  'world-underwater-kingdom': require('../../assets/art/world-underwater-kingdom.webp'),
+  'hero-warrior': require('../../assets/art/hero-warrior.webp'),
+  'hero-mage': require('../../assets/art/hero-mage.webp'),
+  'hero-explorer': require('../../assets/art/hero-explorer.webp'),
+  'hero-detective': require('../../assets/art/hero-detective.webp'),
+  'hero-sailor': require('../../assets/art/hero-sailor.webp'),
+  'hero-inventor': require('../../assets/art/hero-inventor.webp'),
 };

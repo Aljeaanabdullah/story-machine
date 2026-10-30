@@ -52,7 +52,7 @@ export function Screen({ title, subtitle, back, right, left, children, footer, s
       <View style={styles.title}>
         {title ? (
           <>
-            <AppText variant="title" center numberOfLines={1} color="#F1D69A" accessibilityRole="header">
+            <AppText variant="title" center numberOfLines={1} color="#F1D69A" accessibilityRole="header" style={!dir.isRTL && styles.titleLatin}>
               {title}
             </AppText>
             <GoldDivider width={150} />
@@ -99,6 +99,8 @@ const styles = StyleSheet.create({
   header: { alignItems: 'center', paddingHorizontal: 12, minHeight: TOUCH + 4 },
   side: { minWidth: TOUCH + 8 },
   title: { flex: 1, alignItems: 'center' },
+  // Cinzel caps run wide; keep English titles on one line beside the header buttons.
+  titleLatin: { fontSize: 20, lineHeight: 30 },
   subtitle: { paddingHorizontal: 24, paddingBottom: 6, fontSize: 13 },
   iconBtn: {
     width: TOUCH,

@@ -44,7 +44,7 @@ export function WorldCard({ world, width, selected, onPress }: Props) {
           <MaterialCommunityIcons name={world.icon} size={16} color={world.accent} />
         </View>
         <View style={styles.text}>
-          <AppText variant="heading" numberOfLines={1} color={selected ? colors.gold : colors.text} style={styles.name}>
+          <AppText variant="heading" numberOfLines={2} color={selected ? colors.gold : colors.text} style={styles.name}>
             {world.name[lang]}
           </AppText>
           <AppText variant="caption" numberOfLines={2} style={styles.tag}>
@@ -57,7 +57,9 @@ export function WorldCard({ world, width, selected, onPress }: Props) {
 }
 
 const styles = StyleSheet.create({
+  // Grows to the tallest card in its row so two-line names keep the grid even.
   card: {
+    flexGrow: 1,
     borderRadius: radius.md,
     borderWidth: 1.2,
     borderColor: 'rgba(214,180,119,0.45)',
@@ -82,7 +84,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#FFF1CC',
   },
-  info: { alignItems: 'center', gap: 7, paddingHorizontal: 8, paddingVertical: 9, minHeight: 62 },
+  info: { flexGrow: 1, alignItems: 'center', gap: 7, paddingHorizontal: 8, paddingVertical: 9, minHeight: 62 },
   medal: { width: 30, height: 30, borderRadius: 15, borderWidth: 1.2, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(11,16,32,0.8)' },
   text: { flex: 1 },
   name: { fontSize: 13.5, lineHeight: 19 },
