@@ -47,3 +47,6 @@ yarn-error.*
 
 # private design references (not licensed for redistribution)
 design-references/
+
+# local dev-server QR (contains LAN address)
+screenshots/expo-qr.png
