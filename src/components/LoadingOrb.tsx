@@ -31,7 +31,7 @@ export function LoadingOrb({ size = 220, title, lines }: { size?: number; title:
         <View style={StyleSheet.absoluteFill}>
           <MagicCircle size={size} calm={calm} color={colors.gold} inner={colors.purple} />
         </View>
-        <Animated.View style={[{ width: size * 0.42, height: size * 0.42 }, styles.orbShadow, orb]}>
+        <Animated.View style={[{ width: size * 0.42, height: size * 0.42 }, orb]}>
           <Svg width="100%" height="100%" viewBox="0 0 40 40">
             <Defs>
               <RadialGradient id="lo" cx="50%" cy="50%" r="50%">
@@ -58,5 +58,4 @@ export function LoadingOrb({ size = 220, title, lines }: { size?: number; title:
 
 const styles = StyleSheet.create({
   wrap: { alignItems: 'center', gap: 18 },
-  orbShadow: { shadowColor: colors.blue, shadowOpacity: 1, shadowRadius: 24, shadowOffset: { width: 0, height: 0 } },
 });

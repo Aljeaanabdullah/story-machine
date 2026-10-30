@@ -86,5 +86,5 @@ function HoodedSeerBase({ size, calm }: { size: number; calm?: boolean }) {
 export const HoodedSeer = memo(HoodedSeerBase);
 
 const styles = StyleSheet.create({
-  orb: { position: 'absolute', shadowColor: colors.fire, shadowOpacity: 0.9, shadowRadius: 18, shadowOffset: { width: 0, height: 0 } },
+  orb: { position: 'absolute' },
 });

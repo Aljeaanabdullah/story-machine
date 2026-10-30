@@ -14,6 +14,8 @@ type Props = {
   title?: string;
   back?: boolean | (() => void);
   right?: ReactNode;
+  /** Shown in the leading slot when there is no back button. */
+  left?: ReactNode;
   children: ReactNode;
   /** Pinned under the scroll area, e.g. the primary CTA. */
   footer?: ReactNode;
@@ -31,7 +33,7 @@ export function IconButton({ icon, onPress, label }: { icon: keyof typeof Ionico
   );
 }
 
-export function Screen({ title, back, right, children, footer, scroll = true, glow, gradient, particles }: Props) {
+export function Screen({ title, back, right, left, children, footer, scroll = true, glow, gradient, particles }: Props) {
   const insets = useSafeAreaInsets();
   const { dir, s } = useSettings();
 
@@ -41,9 +43,9 @@ export function Screen({ title, back, right, children, footer, scroll = true, gl
     else router.replace('/home');
   };
 
-  const header = (title || back || right) && (
+  const header = (title || back || right || left) && (
     <View style={[styles.header, { flexDirection: dir.row }]}>
-      <View style={styles.side}>{back ? <IconButton icon={dir.isRTL ? 'chevron-forward' : 'chevron-back'} onPress={goBack} label={s.goBack} /> : null}</View>
+      <View style={styles.side}>{back ? <IconButton icon={dir.isRTL ? 'chevron-forward' : 'chevron-back'} onPress={goBack} label={s.goBack} /> : left}</View>
       <AppText variant="heading" center numberOfLines={1} style={styles.title} accessibilityRole="header">
         {title}
       </AppText>
@@ -80,7 +82,7 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   flex: { flex: 1 },
   header: { alignItems: 'center', paddingHorizontal: 12, minHeight: TOUCH + 4 },
-  side: { width: TOUCH + 8 },
+  side: { minWidth: TOUCH + 8 },
   title: { flex: 1 },
   iconBtn: {
     width: TOUCH,

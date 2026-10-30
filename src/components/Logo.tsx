@@ -1,15 +1,16 @@
 import { StyleSheet, View } from 'react-native';
 
+import { ltrRow } from '@/i18n/direction';
 import { useSettings } from '@/state/settings';
 import { colors, fonts } from '@/theme';
 import { AppText } from './AppText';
 
 /** Wordmark: "STORYVERSE" in Cinzel with a glowing "AI" seal and gold rule. */
 export function Logo({ size = 34, tagline = true }: { size?: number; tagline?: boolean }) {
-  const { s } = useSettings();
+  const { s, settings } = useSettings();
   return (
     <View style={styles.wrap} accessible accessibilityRole="header" accessibilityLabel={`${s.appName}. ${s.tagline}`}>
-      <View style={styles.row}>
+      <View style={[styles.row, { flexDirection: ltrRow() }]}>
         <AppText lang="en" variant="display" style={[styles.word, { fontSize: size, lineHeight: size * 1.25 }]} color={colors.gold}>
           STORYVERSE
         </AppText>
@@ -25,7 +26,7 @@ export function Logo({ size = 34, tagline = true }: { size?: number; tagline?: b
         <View style={styles.line} />
       </View>
       {tagline && (
-        <AppText variant="body" center color={colors.textDim} style={styles.tagline}>
+        <AppText variant="body" center color={colors.textDim} style={settings.uiLanguage === 'en' && styles.tagline}>
           {s.tagline}
         </AppText>
       )}
@@ -36,7 +37,7 @@ export function Logo({ size = 34, tagline = true }: { size?: number; tagline?: b
 const styles = StyleSheet.create({
   wrap: { alignItems: 'center', gap: 6 },
   // The wordmark is Latin in both languages, so it never flips.
-  row: { flexDirection: 'row', alignItems: 'center', gap: 8, direction: 'ltr' },
+  row: { alignItems: 'center', gap: 8 },
   word: {
     textShadowColor: 'rgba(214,180,119,0.7)',
     textShadowRadius: 14,
