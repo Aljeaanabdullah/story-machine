@@ -7,7 +7,9 @@ import type { WorldId } from '@/data/catalog';
 import { colors } from '@/theme';
 
 /** A small landscape motif per world, drawn on a 200×100 canvas. */
-function Motif({ id, accent }: { id: WorldId | 'custom'; accent: string }) {
+export type ArtId = WorldId | 'custom' | 'bedtime';
+
+function Motif({ id, accent }: { id: ArtId; accent: string }) {
   const dark = '#070A15';
   switch (id) {
     case 'lost-island':
@@ -85,6 +87,16 @@ function Motif({ id, accent }: { id: WorldId | 'custom'; accent: string }) {
           ))}
         </G>
       );
+    case 'bedtime':
+      return (
+        <G>
+          <Path d="M150 18 A20 20 0 1 0 166 50 A16 16 0 1 1 150 18 Z" fill="#FFF4D6" opacity={0.9} />
+          {[[30, 20], [62, 40], [92, 14], [120, 34], [40, 60], [180, 70]].map(([x, y]) => (
+            <Path key={`${x}-${y}`} d={`M${x} ${y - 3} L${x + 1} ${y} L${x} ${y + 3} L${x - 1} ${y} Z`} fill="#FFF4D6" />
+          ))}
+          <Path d="M0 86 Q50 70 100 84 T200 80 V100 H0 Z" fill={dark} />
+        </G>
+      );
     default:
       return (
         <G>
@@ -96,7 +108,7 @@ function Motif({ id, accent }: { id: WorldId | 'custom'; accent: string }) {
 }
 
 type Props = {
-  id: WorldId | 'custom';
+  id: ArtId;
   gradient: [string, string, string];
   accent: string;
   style?: StyleProp<ViewStyle>;
