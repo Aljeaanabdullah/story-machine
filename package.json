@@ -49,7 +49,9 @@
     "test": "jest",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
-    "doctor": "expo-doctor"
+    "doctor": "expo-doctor",
+    "test:live": "jest --config jest.live.config.js --runInBand --verbose",
+    "check:secrets": "node scripts/check-secrets.js"
   },
   "private": true,
   "jest": {
@@ -59,6 +61,10 @@
     ],
     "setupFiles": [
       "./jest.setup.ts"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/tests/live/"
     ]
   }
 }
