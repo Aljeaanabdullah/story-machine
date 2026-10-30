@@ -2,16 +2,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View } from 'react-native';
 
+import type { ArtSlot } from '@/assets/slots';
 import type { StoryMode } from '@/lib/story/types';
 import { useSettings } from '@/state/settings';
 import { colors, radius } from '@/theme';
 import { AppText } from './AppText';
+import { ArtFrame } from './art/ArtFrame';
 import { PressableScale } from './PressableScale';
 
-export const MODE_STYLE: Record<StoryMode, { icon: keyof typeof Ionicons.glyphMap; gradient: [string, string]; accent: string }> = {
-  short: { icon: 'book-outline', gradient: ['#3A2470', '#141B30'], accent: colors.purple },
-  adventure: { icon: 'git-branch-outline', gradient: ['#6E4A1C', '#141B30'], accent: colors.gold },
-  bedtime: { icon: 'moon-outline', gradient: ['#0F4573', '#141B30'], accent: colors.blue },
+export const MODE_STYLE: Record<StoryMode, { icon: keyof typeof Ionicons.glyphMap; gradient: [string, string]; accent: string; art: ArtSlot }> = {
+  short: { icon: 'book-outline', gradient: ['#3A2470', '#141B30'], accent: colors.purple, art: 'world-enchanted-forest' },
+  adventure: { icon: 'git-branch-outline', gradient: ['#6E4A1C', '#141B30'], accent: colors.gold, art: 'world-ancient-kingdom' },
+  bedtime: { icon: 'moon-outline', gradient: ['#0F4573', '#141B30'], accent: colors.blue, art: 'world-underwater-kingdom' },
 };
 
 export function useModeText(mode: StoryMode) {
@@ -23,83 +25,67 @@ export function useModeText(mode: StoryMode) {
   }[mode];
 }
 
-type Props = { mode: StoryMode; onPress: () => void; compact?: boolean };
+type Props = { mode: StoryMode; onPress: () => void };
 
-export function ModeCard({ mode, onPress, compact }: Props) {
+/** Illustrated story-mode card: painted banner with the title, icon medallion and hook overlaid. */
+export function ModeCard({ mode, onPress }: Props) {
   const { s, dir } = useSettings();
   const { title, desc } = useModeText(mode);
   const st = MODE_STYLE[mode];
   const flagship = mode === 'adventure';
 
-  if (compact) {
-    return (
-      <PressableScale onPress={onPress} accessibilityLabel={title} accessibilityHint={desc} style={styles.compact}>
-        <LinearGradient colors={st.gradient} style={[styles.compactInner, { borderColor: st.accent }]}>
-          <Ionicons name={st.icon} size={26} color={st.accent} />
-          <AppText variant="caption" center color={colors.text} numberOfLines={2}>
+  return (
+    <PressableScale onPress={onPress} accessibilityLabel={title} accessibilityHint={desc} scaleTo={0.98} style={[styles.card, flagship && styles.flagship]}>
+      <ArtFrame
+        slot={st.art}
+        style={StyleSheet.absoluteFill}
+        fadeBottom
+        fadeBottomSize="70%"
+        fadeTo="#0A0F1F"
+        fallback={<LinearGradient colors={st.gradient} style={StyleSheet.absoluteFill} />}
+      />
+      {flagship && (
+        <View style={[styles.badge, dir.isRTL ? { left: 12 } : { right: 12 }]}>
+          <AppText variant="caption" color="#24170A">
+            {s.flagship}
+          </AppText>
+        </View>
+      )}
+      <View style={[styles.row, { flexDirection: dir.row }]}>
+        <View style={[styles.medal, { borderColor: st.accent }]}>
+          <Ionicons name={st.icon} size={24} color={st.accent} />
+        </View>
+        <View style={styles.text}>
+          <AppText variant="heading" color={flagship ? colors.gold : colors.text} style={styles.shadow}>
             {title}
           </AppText>
-        </LinearGradient>
-      </PressableScale>
-    );
-  }
-
-  return (
-    <PressableScale onPress={onPress} accessibilityLabel={title} accessibilityHint={desc} scaleTo={0.98}>
-      <LinearGradient
-        colors={st.gradient}
-        start={{ x: dir.isRTL ? 1 : 0, y: 0 }}
-        end={{ x: dir.isRTL ? 0 : 1, y: 1 }}
-        style={[styles.card, { borderColor: flagship ? colors.gold : colors.border }, flagship && styles.flagshipGlow]}
-      >
-        <View style={[styles.row, { flexDirection: dir.row }]}>
-          <View style={[styles.iconRing, { borderColor: st.accent, shadowColor: st.accent }]}>
-            <Ionicons name={st.icon} size={30} color={st.accent} />
-          </View>
-          <View style={styles.text}>
-            <View style={[styles.titleRow, { flexDirection: dir.row }]}>
-              <AppText variant="heading" style={styles.flexShrink}>
-                {title}
-              </AppText>
-              {flagship && (
-                <View style={styles.badge}>
-                  <AppText variant="caption" color="#2A1A05">
-                    {s.flagship}
-                  </AppText>
-                </View>
-              )}
-            </View>
-            <AppText variant="body" color={colors.textDim}>
-              {desc}
-            </AppText>
-          </View>
-          <Ionicons name={dir.isRTL ? 'chevron-back' : 'chevron-forward'} size={22} color={colors.gold} />
+          <AppText variant="caption" color={colors.text} style={styles.shadow}>
+            {desc}
+          </AppText>
         </View>
-      </LinearGradient>
+        <View style={styles.chevron}>
+          <Ionicons name={dir.isRTL ? 'chevron-back' : 'chevron-forward'} size={18} color={colors.gold} />
+        </View>
+      </View>
     </PressableScale>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: radius.lg, borderWidth: 1, padding: 18, minHeight: 120, justifyContent: 'center' },
-  flagshipGlow: { shadowColor: colors.gold, shadowOpacity: 0.55, shadowRadius: 16, shadowOffset: { width: 0, height: 0 }, elevation: 8 },
-  row: { alignItems: 'center', gap: 14 },
-  iconRing: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(11,16,32,0.6)',
-    shadowOpacity: 0.8,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 0 },
+  card: {
+    height: 176,
+    borderRadius: radius.lg,
+    borderWidth: 1.2,
+    borderColor: 'rgba(214,180,119,0.45)',
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
+    backgroundColor: '#0A0F1F',
   },
-  text: { flex: 1, gap: 4 },
-  titleRow: { alignItems: 'center', gap: 8, flexWrap: 'wrap' },
-  flexShrink: { flexShrink: 1 },
-  badge: { backgroundColor: colors.gold, borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 1 },
-  compact: { flex: 1 },
-  compactInner: { borderRadius: radius.md, borderWidth: 1, paddingVertical: 14, paddingHorizontal: 6, alignItems: 'center', gap: 6, minHeight: 92 },
+  flagship: { borderColor: colors.gold, shadowColor: colors.gold, shadowOpacity: 0.55, shadowRadius: 16, shadowOffset: { width: 0, height: 0 }, elevation: 8 },
+  badge: { position: 'absolute', top: 12, backgroundColor: colors.gold, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 2 },
+  row: { alignItems: 'center', gap: 12, padding: 14 },
+  medal: { width: 46, height: 46, borderRadius: 23, borderWidth: 1.4, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(11,16,32,0.85)' },
+  text: { flex: 1, gap: 2 },
+  shadow: { textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 8, textShadowOffset: { width: 0, height: 1 } },
+  chevron: { width: 32, height: 32, borderRadius: 16, borderWidth: 1, borderColor: colors.goldDim, alignItems: 'center', justifyContent: 'center' },
 });

@@ -3,17 +3,18 @@ import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { ArchetypeEmblem } from '@/components/art/ArchetypeEmblem';
-import { ChipGroup } from '@/components/Chip';
+import { Chip, ChipGroup } from '@/components/Chip';
 import { Field, SectionLabel } from '@/components/Field';
-import { GoldButton } from '@/components/GoldButton';
+import { HeroButton } from '@/components/HeroButton';
 import { useModeText } from '@/components/ModeCard';
 import { OrnateCard } from '@/components/OrnateCard';
 import { Screen } from '@/components/Screen';
+import { StoryArt } from '@/components/StoryArt';
 import { AGE_RANGES, ARCHETYPES, BEDTIME_THEMES, findWorld, GENRES, MOODS } from '@/data/catalog';
 import type { Language } from '@/i18n/strings';
 import { useDraft } from '@/state/draft';
 import { useSettings } from '@/state/settings';
-import { colors } from '@/theme';
+import { colors, radius } from '@/theme';
 
 export default function Setup() {
   const { s, settings, dir } = useSettings();
@@ -43,13 +44,16 @@ export default function Setup() {
               {s.ideaRequired}
             </AppText>
           )}
-          <GoldButton label={s.begin} icon="sparkles" glow={valid} disabled={!valid} onPress={() => router.push('/generating')} />
+          <HeroButton label={s.begin} sub={mode.title} glow={valid} disabled={!valid} onPress={() => router.push('/generating')} />
         </>
       }
     >
-      <AppText variant="label" center color={colors.gold}>
-        {mode.title}
-      </AppText>
+      <View style={styles.banner}>
+        <StoryArt draft={draft} style={StyleSheet.absoluteFill} fadeBottom fadeTo="#0B1020" />
+        <AppText variant="heading" center color={colors.gold} style={styles.bannerTitle}>
+          {mode.title}
+        </AppText>
+      </View>
 
       {!bedtime && (
         <OrnateCard style={[styles.summary, { flexDirection: dir.row }]}>
@@ -59,7 +63,7 @@ export default function Setup() {
               {s.hero}
             </AppText>
             <AppText variant="heading" numberOfLines={1}>
-              {draft.character.name || arch.name[lang]} · {arch.name[lang]}
+              {draft.character.name.trim() ? `${draft.character.name} · ${arch.name[lang]}` : arch.name[lang]}
             </AppText>
             <AppText variant="caption" color={colors.gold}>
               {s.world}
@@ -108,6 +112,14 @@ export default function Setup() {
       )}
 
       <Field label={s.storyIdea} hint={s.optional} value={draft.idea} onChangeText={(idea) => patch({ idea })} placeholder={s.storyIdeaPlaceholder} maxLength={300} multiline />
+      <View style={styles.section}>
+        <SectionLabel>{s.orChooseIdea}</SectionLabel>
+        <View style={[styles.ideas, { flexDirection: dir.row }]}>
+          {(bedtime ? s.bedtimeSuggestions : s.ideaSuggestions).map((idea) => (
+            <Chip key={idea} label={idea} selected={draft.idea === idea} onPress={() => patch({ idea })} accent={bedtime ? colors.blue : colors.gold} />
+          ))}
+        </View>
+      </View>
 
       <View style={styles.section}>
         <SectionLabel>{s.storyLanguage}</SectionLabel>
@@ -121,4 +133,7 @@ const styles = StyleSheet.create({
   summary: { alignItems: 'center', gap: 14 },
   flex: { flex: 1 },
   section: { gap: 10 },
+  ideas: { flexWrap: 'wrap', gap: 8 },
+  banner: { height: 150, borderRadius: radius.lg, overflow: 'hidden', borderWidth: 1.2, borderColor: 'rgba(214,180,119,0.45)', justifyContent: 'flex-end' },
+  bannerTitle: { paddingBottom: 12, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 8, textShadowOffset: { width: 0, height: 1 } },
 });

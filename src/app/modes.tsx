@@ -12,7 +12,7 @@ export default function Modes() {
   const { s, calm } = useSettings();
   const startMode = useStartMode();
   return (
-    <Screen title={s.modesTitle} back>
+    <Screen title={s.modesTitle} subtitle={s.worldSubtitle} back>
       {ORDER.map((mode, i) => (
         <Animated.View key={mode} entering={calm ? undefined : FadeInDown.delay(i * 120).duration(500)}>
           <ModeCard mode={mode} onPress={() => startMode(mode)} />

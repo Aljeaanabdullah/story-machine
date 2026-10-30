@@ -13,7 +13,11 @@ export type Settings = {
   haptics: boolean;
   /** Empty string means "use the model from .env.local". */
   model: string;
+  /** Reading text size multiplier for story text. */
+  textScale: number;
 };
+
+export const TEXT_SCALES = [1, 1.15, 1.3] as const;
 
 export const DEFAULT_SETTINGS: Settings = {
   uiLanguage: 'en',
@@ -21,6 +25,7 @@ export const DEFAULT_SETTINGS: Settings = {
   reduceMotion: false,
   haptics: true,
   model: '',
+  textScale: 1,
 };
 
 function isStory(x: unknown): x is Story {
@@ -63,6 +68,7 @@ export async function loadSettings(): Promise<Settings | null> {
       reduceMotion: parsed.reduceMotion === true,
       haptics: parsed.haptics !== false,
       model: typeof parsed.model === 'string' ? parsed.model : '',
+      textScale: (TEXT_SCALES as readonly number[]).includes(parsed.textScale as number) ? (parsed.textScale as number) : 1,
     };
   } catch {
     return null;

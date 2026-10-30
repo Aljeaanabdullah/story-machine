@@ -56,14 +56,14 @@ describe('settings persistence and language selection', () => {
   });
 
   it('round-trips Arabic language settings', async () => {
-    const s = { ...DEFAULT_SETTINGS, uiLanguage: 'ar' as const, storyLanguage: 'ar' as const, reduceMotion: true, model: 'x/y:free' };
+    const s = { ...DEFAULT_SETTINGS, uiLanguage: 'ar' as const, storyLanguage: 'ar' as const, reduceMotion: true, model: 'x/y:free', textScale: 1.3 };
     await saveSettings(s);
     expect(await loadSettings()).toEqual(s);
   });
 
   it('sanitises unknown values', async () => {
     await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify({ uiLanguage: 'fr', storyLanguage: 42, reduceMotion: 'yes', haptics: false, model: 7 }));
-    expect(await loadSettings()).toEqual({ uiLanguage: 'en', storyLanguage: 'en', reduceMotion: false, haptics: false, model: '' });
+    expect(await loadSettings()).toEqual({ uiLanguage: 'en', storyLanguage: 'en', reduceMotion: false, haptics: false, model: '', textScale: 1 });
   });
 
   it('survives corrupt settings', async () => {

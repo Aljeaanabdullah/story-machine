@@ -41,7 +41,9 @@ export function AppText({ variant = 'body', color, center, lang, style, ...rest 
   const { settings, dir } = useSettings();
   const contentLang = lang ?? settings.uiLanguage;
   const ar = contentLang === 'ar';
-  const { size, line } = sizes[variant];
+  const scale = variant === 'story' ? settings.textScale : 1;
+  const size = sizes[variant].size * scale;
+  const line = sizes[variant].line * scale;
   // Arabic glyphs need extra leading; story text gets the most.
   const lineHeight = ar ? Math.round(line * (variant === 'story' ? 1.18 : 1.1)) : line;
   // Align by the content's own language so an Arabic story reads correctly inside the English UI.

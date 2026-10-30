@@ -12,6 +12,7 @@ import { OrnateCard } from '@/components/OrnateCard';
 import { Screen } from '@/components/Screen';
 import type { Language } from '@/i18n/strings';
 import { getAIConfig, hasApiKey, isFreeModel } from '@/lib/ai/config';
+import { TEXT_SCALES } from '@/lib/storage';
 import { useSettings } from '@/state/settings';
 import { useStories } from '@/state/stories';
 import { colors } from '@/theme';
@@ -60,6 +61,12 @@ export default function SettingsScreen() {
       <OrnateCard style={styles.card}>
         <ToggleRow label={s.reduceMotion} desc={s.reduceMotionDesc} value={settings.reduceMotion} onChange={(reduceMotion) => update({ reduceMotion })} />
         <ToggleRow label={s.haptics} value={settings.haptics} onChange={(haptics) => update({ haptics })} />
+        <SectionLabel>{s.textSize}</SectionLabel>
+        <ChipGroup
+          options={TEXT_SCALES.map((v) => ({ id: String(v), label: `${Math.round(v * 100)}%` }))}
+          value={String(settings.textScale)}
+          onChange={(v) => update({ textScale: Number(v) })}
+        />
       </OrnateCard>
 
       <OrnateCard style={styles.card}>

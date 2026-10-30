@@ -10,6 +10,7 @@ import { useModeText } from '@/components/ModeCard';
 import { OrnateCard } from '@/components/OrnateCard';
 import { IconButton, Screen } from '@/components/Screen';
 import { StoryArt, storyAccent } from '@/components/StoryArt';
+import { TextSizeButton } from '@/components/TextSizeButton';
 import { touch } from '@/lib/story/factory';
 import { useDraft } from '@/state/draft';
 import { useSettings } from '@/state/settings';
@@ -54,7 +55,12 @@ export default function StoryReader() {
     <Screen
       back
       glow={accent}
-      right={<IconButton icon="library-outline" label={s.backToLibrary} onPress={() => router.push('/library')} />}
+      right={
+        <View style={[styles.headerActions, { flexDirection: dir.row }]}>
+          <TextSizeButton />
+          <IconButton icon="library-outline" label={s.backToLibrary} onPress={() => router.push('/library')} />
+        </View>
+      }
       footer={
         <>
           <View style={[styles.row, { flexDirection: dir.row }]}>
@@ -76,7 +82,7 @@ export default function StoryReader() {
     >
       <Animated.View entering={calm ? undefined : FadeInDown.duration(600)}>
         <OrnateCard style={styles.page} accent={accent}>
-          <StoryArt draft={story.draft} style={styles.art} />
+          <StoryArt draft={story.draft} style={styles.art} fadeBottom fadeTo="#131A2F" />
           <View style={styles.head}>
             <AppText variant="caption" center color={accent}>
               {mode.title} · {date}
@@ -106,8 +112,9 @@ const styles = StyleSheet.create({
   row: { gap: 10 },
   flex: { flex: 1 },
   page: { padding: 0, overflow: 'hidden' },
-  art: { height: 150, borderTopLeftRadius: radius.md, borderTopRightRadius: radius.md },
-  head: { paddingHorizontal: 18, paddingTop: 16, gap: 6, alignItems: 'center' },
+  headerActions: { gap: 8 },
+  art: { height: 190, borderTopLeftRadius: radius.md, borderTopRightRadius: radius.md },
+  head: { paddingHorizontal: 18, paddingTop: 4, marginTop: -28, gap: 6, alignItems: 'center' },
   rule: { width: 80, height: 1, backgroundColor: colors.goldDim, marginTop: 6 },
   body: { padding: 20, gap: 16 },
 });

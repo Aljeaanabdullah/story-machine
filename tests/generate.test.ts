@@ -47,6 +47,21 @@ describe('requestValidated retry budget', () => {
     expect(err.kind).toBe('not_found');
   });
 
+  it('stops at once when the caller cancels, without retries or fallbacks', async () => {
+    const ctrl = new AbortController();
+    const calls: string[] = [];
+    const hanging = ((_: string, init: RequestInit) => {
+      calls.push(JSON.parse(String(init.body)).model);
+      return new Promise((_resolve, reject) => {
+        init.signal?.addEventListener('abort', () => reject(Object.assign(new Error('aborted'), { name: 'AbortError' })));
+      });
+    }) as unknown as typeof fetch;
+    const p = requestValidated(msgs, parse, { config: TEST_CONFIG, fetchImpl: hanging, signal: ctrl.signal });
+    ctrl.abort();
+    await expect(p).rejects.toBeInstanceOf(AIError);
+    expect(calls).toEqual(['primary/model:free']);
+  });
+
   it('rejects with no_key when no API key is configured', async () => {
     const m = mockFetch([]);
     await expect(requestValidated(msgs, parse, { config: { ...TEST_CONFIG, apiKey: '' }, fetchImpl: m.fetch })).rejects.toMatchObject({ kind: 'no_key' });

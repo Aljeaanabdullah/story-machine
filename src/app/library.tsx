@@ -6,6 +6,7 @@ import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated'
 
 import { AppText } from '@/components/AppText';
 import { MagicCircle } from '@/components/art/MagicCircle';
+import { ChipGroup } from '@/components/Chip';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { GoldButton } from '@/components/GoldButton';
 import { MODE_STYLE, useModeText } from '@/components/ModeCard';
@@ -13,7 +14,7 @@ import { OrnateCard } from '@/components/OrnateCard';
 import { PressableScale } from '@/components/PressableScale';
 import { Screen } from '@/components/Screen';
 import { StoryArt } from '@/components/StoryArt';
-import { storyProgress, type Story } from '@/lib/story/types';
+import { storyProgress, type Story, type StoryMode } from '@/lib/story/types';
 import { useSettings } from '@/state/settings';
 import { useStories } from '@/state/stories';
 import { colors, radius, TOUCH } from '@/theme';
@@ -71,11 +72,25 @@ export default function Library() {
   const { s, calm } = useSettings();
   const { stories, remove, ready } = useStories();
   const [pending, setPending] = useState<Story | null>(null);
-  const saved = useMemo(() => stories.filter((st) => st.saved).sort((a, b) => b.updatedAt - a.updatedAt), [stories]);
+  const [filter, setFilter] = useState<'all' | StoryMode>('all');
+  const allSaved = useMemo(() => stories.filter((st) => st.saved).sort((a, b) => b.updatedAt - a.updatedAt), [stories]);
+  const saved = useMemo(() => (filter === 'all' ? allSaved : allSaved.filter((st) => st.mode === filter)), [allSaved, filter]);
+  const filters: { id: 'all' | StoryMode; label: string }[] = [
+    { id: 'all', label: `${s.all} (${allSaved.length})` },
+    { id: 'adventure', label: s.homeAdventure },
+    { id: 'short', label: s.homeShort },
+    { id: 'bedtime', label: s.homeKids },
+  ];
 
   return (
     <Screen title={s.libraryTitle} back>
-      {ready && saved.length === 0 && (
+      {allSaved.length > 0 && <ChipGroup options={filters} value={filter} onChange={setFilter} />}
+      {ready && allSaved.length > 0 && saved.length === 0 && (
+        <AppText variant="body" center color={colors.textDim}>
+          {s.libraryEmpty}
+        </AppText>
+      )}
+      {ready && allSaved.length === 0 && (
         <View style={styles.empty}>
           <MagicCircle size={180} calm={calm} />
           <AppText variant="body" center color={colors.textDim}>

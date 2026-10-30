@@ -1,26 +1,25 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 
 import { AppText } from '@/components/AppText';
 import { ArchetypeEmblem } from '@/components/art/ArchetypeEmblem';
-import { MagicCircle } from '@/components/art/MagicCircle';
 import { ErrorPanel } from '@/components/ErrorPanel';
 import { GoldButton } from '@/components/GoldButton';
 import { OrnateCard } from '@/components/OrnateCard';
 import { Screen } from '@/components/Screen';
-import { storyAccent } from '@/components/StoryArt';
+import { StoryArt, storyAccent } from '@/components/StoryArt';
 import { ARCHETYPES } from '@/data/catalog';
 import { useSettings } from '@/state/settings';
 import { useStories } from '@/state/stories';
 import { useStartMode } from '@/state/useStartMode';
-import { colors } from '@/theme';
+import { colors, radius } from '@/theme';
 
 export default function Ending() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { s, settings, dir, calm } = useSettings();
   const { get, ready } = useStories();
-  const { width } = useWindowDimensions();
   const startMode = useStartMode();
   const story = get(id);
   const adv = story?.adventure;
@@ -31,7 +30,6 @@ export default function Ending() {
 
   const last = adv.scenes[adv.scenes.length - 1];
   const arch = ARCHETYPES.find((a) => a.id === story.draft.character.archetype) ?? ARCHETYPES[0];
-  const size = Math.min(width * 0.6, 240);
   const enter = (d: number) => (calm ? undefined : FadeInDown.delay(d).duration(500));
 
   return (
@@ -48,22 +46,40 @@ export default function Ending() {
         </>
       }
     >
-      <View style={styles.center}>
-        <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
-          <View style={StyleSheet.absoluteFill}>
-            <MagicCircle size={size} calm={calm} inner={arch.color} />
-          </View>
+      <View style={styles.banner}>
+        <StoryArt draft={story.draft} style={StyleSheet.absoluteFill} fadeBottom fadeTo="#0B1020" />
+        <View style={styles.bannerText}>
           <Animated.View entering={calm ? undefined : ZoomIn.duration(700)}>
-            <ArchetypeEmblem id={arch.id} size={size * 0.5} color={arch.color} />
+            <ArchetypeEmblem id={arch.id} size={58} color={arch.color} />
           </Animated.View>
+          <AppText variant="display" center color="#F1D69A" accessibilityRole="header" style={styles.shadow}>
+            {s.endingTitle}
+          </AppText>
+          <AppText variant="heading" center lang={story.language} style={styles.shadow}>
+            {story.draft.character.name} — {last?.title}
+          </AppText>
         </View>
-        <AppText variant="display" center color={colors.gold} accessibilityRole="header">
-          {s.endingTitle}
-        </AppText>
-        <AppText variant="heading" center lang={story.language}>
-          {story.draft.character.name} — {last?.title}
-        </AppText>
       </View>
+
+      <Animated.View entering={enter(100)}>
+        <OrnateCard corners={false} style={[styles.stats, { flexDirection: dir.row }]}>
+          {[
+            ['map-marker-path', s.scenesPlayed, String(adv.scenes.length)],
+            ['source-branch', s.choicesMade, String(adv.choices.length)],
+            ['flag-checkered', s.endingLabel, s.epicEnding],
+          ].map(([icon, label, value], i) => (
+            <View key={label} style={[styles.stat, i > 0 && styles.statDivider]}>
+              <MaterialCommunityIcons name={icon as 'flag-checkered'} size={22} color={colors.gold} />
+              <AppText variant="caption" center>
+                {label}
+              </AppText>
+              <AppText variant="heading" center color={colors.text}>
+                {value}
+              </AppText>
+            </View>
+          ))}
+        </OrnateCard>
+      </Animated.View>
 
       <Animated.View entering={enter(200)}>
         <OrnateCard style={styles.gap}>
@@ -103,6 +119,12 @@ export default function Ending() {
 }
 
 const styles = StyleSheet.create({
+  banner: { height: 300, borderRadius: radius.lg, overflow: 'hidden', borderWidth: 1.2, borderColor: 'rgba(214,180,119,0.5)', justifyContent: 'flex-end' },
+  bannerText: { alignItems: 'center', gap: 4, padding: 16 },
+  shadow: { textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 10, textShadowOffset: { width: 0, height: 1 } },
+  stats: { paddingVertical: 12, paddingHorizontal: 6 },
+  stat: { flex: 1, alignItems: 'center', gap: 2 },
+  statDivider: { borderStartWidth: 1, borderColor: 'rgba(214,180,119,0.25)' },
   center: { alignItems: 'center', gap: 8 },
   row: { gap: 10 },
   flex: { flex: 1 },

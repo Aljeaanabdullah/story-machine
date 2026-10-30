@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState, type ComponentRef } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { AccessibilityInfo, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -15,6 +15,7 @@ import { OrnateCard } from '@/components/OrnateCard';
 import { ProgressRunes } from '@/components/ProgressRunes';
 import { IconButton } from '@/components/Screen';
 import { StoryArt, storyAccent } from '@/components/StoryArt';
+import { TextSizeButton } from '@/components/TextSizeButton';
 import { errorMessage, logAIError } from '@/lib/ai/errors';
 import { awaitingNextScene, choose, currentScene, needsScene, restartAdventure } from '@/lib/story/engine';
 import { touch } from '@/lib/story/factory';
@@ -47,6 +48,8 @@ export default function AdventureScreen() {
         const adventure = await generateNextScene(base.draft, base.adventure, { modelOverride: settings.model || undefined });
         upsert(touch(base, { adventure }));
         scrollRef.current?.scrollTo({ y: 0, animated: !calm });
+        const latest = adventure.scenes[adventure.scenes.length - 1];
+        if (latest) AccessibilityInfo.announceForAccessibility(`${s.newSceneAnnouncement} ${latest.number}: ${latest.title}`);
       } catch (e) {
         logAIError(e);
         setError(errorMessage(e, s));
@@ -113,7 +116,7 @@ export default function AdventureScreen() {
         </View>
         <View style={[styles.headerActions, { flexDirection: dir.row }]}>
           <IconButton icon="refresh" label={s.restartStory} onPress={() => setConfirmRestart(true)} />
-          <IconButton icon="library-outline" label={s.backToLibrary} onPress={() => router.push('/library')} />
+          <TextSizeButton />
         </View>
       </View>
 
@@ -131,7 +134,7 @@ export default function AdventureScreen() {
               </View>
             )}
             <OrnateCard style={styles.page} accent={accent}>
-              <StoryArt draft={story.draft} style={styles.art} />
+              <StoryArt draft={story.draft} style={styles.art} fadeBottom fadeTo="#131A2F" />
               <View style={styles.sceneHead}>
                 <AppText variant="caption" center color={accent}>
                   {s.scene} {scene.number}
@@ -219,8 +222,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(20,27,48,0.7)',
   },
   page: { padding: 0, overflow: 'hidden' },
-  art: { height: 130, borderTopLeftRadius: radius.md, borderTopRightRadius: radius.md },
-  sceneHead: { paddingHorizontal: 18, paddingTop: 14, gap: 4 },
+  art: { height: 180, borderTopLeftRadius: radius.md, borderTopRightRadius: radius.md },
+  sceneHead: { paddingHorizontal: 18, marginTop: -26, gap: 4 },
   body: { padding: 20, paddingTop: 12, gap: 14 },
   loading: { alignItems: 'center', paddingVertical: 10 },
 });

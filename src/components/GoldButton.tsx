@@ -64,7 +64,7 @@ function Inner({ label, icon, color, row, loading }: { label: string; icon?: Pro
   return (
     <View style={[styles.inner, { flexDirection: row }]}>
       {loading ? <ActivityIndicator color={color} /> : icon ? <Ionicons name={icon} size={20} color={color} /> : null}
-      <AppText variant="label" color={color} style={styles.label} numberOfLines={1}>
+      <AppText variant="label" center color={color} style={styles.label} numberOfLines={2}>
         {label}
       </AppText>
     </View>
@@ -92,5 +92,5 @@ const styles = StyleSheet.create({
   secondary: { borderWidth: 1.5, borderColor: colors.gold, backgroundColor: 'rgba(214,180,119,0.08)' },
   ghost: { borderWidth: 1, borderColor: 'rgba(174,181,203,0.3)', backgroundColor: 'rgba(20,27,48,0.6)' },
   inner: { alignItems: 'center', justifyContent: 'center', gap: 10 },
-  label: { fontSize: 15, flexShrink: 1 },
+  label: { fontSize: 15, lineHeight: 19, flexShrink: 1 },
 });
