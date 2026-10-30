@@ -7,6 +7,7 @@ export type AIErrorKind =
   | 'payment'
   | 'not_found'
   | 'rate_limited'
+  | 'quota'
   | 'server'
   | 'network'
   | 'timeout'
@@ -26,7 +27,13 @@ export class AIError extends Error {
   }
 }
 
-export function kindForStatus(status: number): AIErrorKind {
+/** 429s caused by the account's daily free-model cap; other free models share it, so don't fall back. */
+export function isDailyQuota(message: string) {
+  return /per-day|per day|daily/i.test(message);
+}
+
+export function kindForStatus(status: number, message = ''): AIErrorKind {
+  if (status === 429 && isDailyQuota(message)) return 'quota';
   if (status === 400) return 'bad_request';
   if (status === 401 || status === 403) return 'unauthorized';
   if (status === 402) return 'payment';
@@ -37,9 +44,12 @@ export function kindForStatus(status: number): AIErrorKind {
   return 'unknown';
 }
 
-/** Failures where trying a different free model may help. */
+/**
+ * Failures where trying a different free model may help. "empty" is included because
+ * reasoning models can spend their whole token budget thinking and return no answer.
+ */
 export function isModelSpecific(kind: AIErrorKind) {
-  return kind === 'not_found' || kind === 'rate_limited' || kind === 'server' || kind === 'bad_request';
+  return kind === 'not_found' || kind === 'rate_limited' || kind === 'server' || kind === 'bad_request' || kind === 'empty';
 }
 
 export type ChatMessage = { role: 'system' | 'user' | 'assistant'; content: string };
@@ -104,12 +114,12 @@ export async function chat({ apiKey, model, messages, maxTokens = 2000, temperat
   }
 
   if (!res.ok) {
-    throw new AIError(kindForStatus(res.status), body?.error?.message ?? '', res.status);
+    throw new AIError(kindForStatus(res.status, body?.error?.message ?? ''), body?.error?.message ?? '', res.status);
   }
   // OpenRouter can report upstream failures inside a 200 body.
   if (body?.error) {
     const status = typeof body.error.code === 'number' ? body.error.code : 500;
-    throw new AIError(kindForStatus(status), body.error.message ?? '', status);
+    throw new AIError(kindForStatus(status, body.error.message ?? ''), body.error.message ?? '', status);
   }
 
   const content = body?.choices?.[0]?.message?.content;

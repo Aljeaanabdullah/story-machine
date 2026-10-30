@@ -1,4 +1,4 @@
-import { asStringList, extractJsonObject, wordCount } from '@/lib/ai/json';
+import { asStringList, extractAnswer, extractJsonObject, extractJsonObjects, wordCount } from '@/lib/ai/json';
 
 describe('extractJsonObject', () => {
   it('parses a plain object', () => {
@@ -27,6 +27,21 @@ describe('extractJsonObject', () => {
 
   it('keeps Arabic text intact', () => {
     expect(extractJsonObject('{"title":"البحّار والجزيرة"}')).toEqual({ title: 'البحّار والجزيرة' });
+  });
+});
+
+describe('leaked reasoning (seen live from a free reasoning model)', () => {
+  const raw =
+    'We need to output JSON with title and story. Something like {title, story}. Maybe {"draft": true}.\n' +
+    'Let me write it.\n{"title":"Noor and the Library","story":"Once upon a time..."}';
+
+  it('collects every parseable object in order', () => {
+    expect(extractJsonObjects(raw)).toEqual([{ draft: true }, { title: 'Noor and the Library', story: 'Once upon a time...' }]);
+  });
+
+  it('extractAnswer returns the final object with the expected keys', () => {
+    expect(extractAnswer(raw, ['story'])).toEqual({ title: 'Noor and the Library', story: 'Once upon a time...' });
+    expect(extractAnswer(raw, ['narrative'])).toBeUndefined();
   });
 });
 

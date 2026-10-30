@@ -37,7 +37,7 @@ describe('bilingual strings', () => {
   });
 
   it('translates every AI error kind in both languages without leaking details', () => {
-    const kinds: AIErrorKind[] = ['no_key', 'bad_request', 'unauthorized', 'payment', 'not_found', 'rate_limited', 'server', 'network', 'timeout', 'empty', 'invalid', 'unknown'];
+    const kinds: AIErrorKind[] = ['no_key', 'bad_request', 'unauthorized', 'payment', 'not_found', 'rate_limited', 'quota', 'server', 'network', 'timeout', 'empty', 'invalid', 'unknown'];
     for (const kind of kinds) {
       const en = errorMessage(new AIError(kind, 'secret upstream detail'), strings.en);
       const ar = errorMessage(new AIError(kind, 'secret upstream detail'), strings.ar);

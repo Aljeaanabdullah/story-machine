@@ -13,6 +13,12 @@ describe('parseProse (short and bedtime stories)', () => {
     expect(parseProse(JSON.stringify({ title: 'x', story: words(50) }), MIN_WORDS.short)).toEqual({ ok: false, reason: 'too_short' });
   });
 
+  it('finds the story after leaked reasoning that contains braces', () => {
+    const raw = `We need JSON like {title, story}. {"note":"plan"}
+${JSON.stringify({ title: 'Real', story: words(200) })}`;
+    expect(parseProse(raw, MIN_WORDS.bedtime)).toEqual({ ok: true, value: { title: 'Real', content: words(200) } });
+  });
+
   it('derives a title when the model omits it', () => {
     const r = parseProse(JSON.stringify({ story: words(150, 'moon') }), MIN_WORDS.bedtime);
     expect(r.ok && r.value.title).toBe('moon moon moon moon moon');

@@ -43,6 +43,13 @@ describe('OpenRouter chat client', () => {
     expect(err.status).toBe(status);
   });
 
+  it('recognises the daily free-model cap as quota, not a short rate limit', async () => {
+    const msg = 'Rate limit exceeded: free-models-per-day. Add 10 credits to unlock 1000 free model requests per day';
+    const m = mockFetch([{ status: 429, body: { error: { code: 429, message: msg } } }]);
+    expect((await errorOf(chat({ ...base, fetchImpl: m.fetch }))).kind).toBe('quota');
+    expect(isModelSpecific('quota')).toBe(false);
+  });
+
   it('treats an error object inside a 200 response as a failure', async () => {
     const m = mockFetch([{ status: 200, body: { error: { code: 429, message: 'upstream busy' } } }]);
     expect((await errorOf(chat({ ...base, fetchImpl: m.fetch }))).kind).toBe('rate_limited');
@@ -81,6 +88,7 @@ describe('OpenRouter chat client', () => {
     expect(kindForStatus(418)).toBe('unknown');
     expect(isModelSpecific('rate_limited')).toBe(true);
     expect(isModelSpecific('not_found')).toBe(true);
+    expect(isModelSpecific('empty')).toBe(true);
     expect(isModelSpecific('unauthorized')).toBe(false);
     expect(isModelSpecific('payment')).toBe(false);
     expect(isModelSpecific('network')).toBe(false);

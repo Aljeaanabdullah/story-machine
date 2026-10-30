@@ -1,4 +1,4 @@
-import { asString, asStringList, extractJsonObject, wordCount } from '@/lib/ai/json';
+import { asString, asStringList, extractAnswer, extractJsonObjects, wordCount } from '@/lib/ai/json';
 import type { AdventureMemory, Scene } from './types';
 
 export type Result<T> = { ok: true; value: T } | { ok: false; reason: string };
@@ -7,7 +7,8 @@ export const MIN_WORDS = { short: 200, bedtime: 120, scene: 50 } as const;
 
 /** Validates a {title, story} reply for short and bedtime modes. */
 export function parseProse(raw: string, minWords: number): Result<{ title: string; content: string }> {
-  const obj = extractJsonObject(raw) as Record<string, unknown> | undefined;
+  // Prefer the final object carrying the story; otherwise report what was wrong with the last one.
+  const obj = extractAnswer(raw, ['story', 'text', 'content']) ?? extractJsonObjects(raw).at(-1);
   if (!obj || typeof obj !== 'object') return { ok: false, reason: 'not_json' };
   const content = asString(obj.story ?? obj.text ?? obj.content, 12000).replace(/\r\n/g, '\n');
   if (!content) return { ok: false, reason: 'missing_story' };
@@ -25,7 +26,7 @@ export type SceneParse = { scene: Scene; memory: Partial<AdventureMemory> };
  *  - endings before `minEndScene` are rejected so adventures can't fizzle out.
  */
 export function parseScene(raw: string, number: number, maxScenes: number, minEndScene = maxScenes - 1): Result<SceneParse> {
-  const obj = extractJsonObject(raw) as Record<string, unknown> | undefined;
+  const obj = extractAnswer(raw, ['narrative', 'text', 'story']) ?? extractJsonObjects(raw).at(-1);
   if (!obj || typeof obj !== 'object') return { ok: false, reason: 'not_json' };
 
   const text = asString(obj.narrative ?? obj.text ?? obj.story, 6000).replace(/\r\n/g, '\n');

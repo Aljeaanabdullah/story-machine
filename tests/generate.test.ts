@@ -22,9 +22,21 @@ describe('requestValidated retry budget', () => {
     expect(m.calls.map((c) => c.model)).toEqual(['primary/model:free', 'fallback/model:free']);
   });
 
+  it('moves to the fallback model when a reasoning model returns empty content', async () => {
+    const m = mockFetch([{ content: null }, { content: 'good' }]);
+    await expect(requestValidated(msgs, parse, { config: TEST_CONFIG, fetchImpl: m.fetch })).resolves.toBe('good');
+    expect(m.calls.map((c) => c.model)).toEqual(['primary/model:free', 'fallback/model:free']);
+  });
+
   it('stops immediately on 401 without trying fallbacks', async () => {
     const m = mockFetch([{ status: 401 }]);
     await expect(requestValidated(msgs, parse, { config: TEST_CONFIG, fetchImpl: m.fetch })).rejects.toMatchObject({ kind: 'unauthorized' });
+    expect(m.calls).toHaveLength(1);
+  });
+
+  it('does not burn fallbacks once the daily free quota is used up', async () => {
+    const m = mockFetch([{ status: 429, body: { error: { message: 'Rate limit exceeded: free-models-per-day' } } }]);
+    await expect(requestValidated(msgs, parse, { config: TEST_CONFIG, fetchImpl: m.fetch })).rejects.toMatchObject({ kind: 'quota' });
     expect(m.calls).toHaveLength(1);
   });
 

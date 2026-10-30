@@ -1,18 +1,10 @@
-/**
- * Pulls the first JSON object out of a model reply. Models often wrap JSON in
- * ``` fences or add a sentence before/after it, so we scan for a balanced
- * object instead of trusting the whole string.
- */
-export function extractJsonObject(text: string): unknown {
-  const cleaned = text.replace(/```(?:json)?/gi, '').trim();
-  const start = cleaned.indexOf('{');
-  if (start < 0) return undefined;
-
+/** End index of the balanced {...} starting at `start`, ignoring braces inside strings. */
+function balancedEnd(text: string, start: number): number {
   let depth = 0;
   let inString = false;
   let escaped = false;
-  for (let i = start; i < cleaned.length; i++) {
-    const ch = cleaned[i];
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
     if (inString) {
       if (escaped) escaped = false;
       else if (ch === '\\') escaped = true;
@@ -23,9 +15,43 @@ export function extractJsonObject(text: string): unknown {
     else if (ch === '{') depth++;
     else if (ch === '}') {
       depth--;
-      if (depth === 0) return tryParse(cleaned.slice(start, i + 1));
+      if (depth === 0) return i;
     }
   }
+  return -1;
+}
+
+/**
+ * Every top-level JSON object found in a model reply, in order. Models wrap JSON in
+ * ``` fences, add sentences around it, or leak their reasoning (which may itself
+ * contain braces) before the real answer, so callers usually want the last match.
+ */
+export function extractJsonObjects(text: string): Record<string, unknown>[] {
+  const cleaned = text.replace(/```(?:json)?/gi, '');
+  const found: Record<string, unknown>[] = [];
+  let i = cleaned.indexOf('{');
+  while (i >= 0) {
+    const end = balancedEnd(cleaned, i);
+    const parsed = end > 0 ? tryParse(cleaned.slice(i, end + 1)) : undefined;
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      found.push(parsed as Record<string, unknown>);
+      i = cleaned.indexOf('{', end + 1);
+    } else {
+      i = cleaned.indexOf('{', i + 1);
+    }
+  }
+  return found;
+}
+
+/** The first JSON object in a reply, or undefined. */
+export function extractJsonObject(text: string): unknown {
+  return extractJsonObjects(text)[0];
+}
+
+/** The last object in a reply that has any of the given keys (the model's final answer). */
+export function extractAnswer(text: string, keys: string[]): Record<string, unknown> | undefined {
+  const all = extractJsonObjects(text);
+  for (let i = all.length - 1; i >= 0; i--) if (keys.some((k) => k in all[i])) return all[i];
   return undefined;
 }
 
