@@ -18,7 +18,8 @@ import { IconButton } from '@/components/Screen';
 import { StoryArt, storyAccent } from '@/components/StoryArt';
 import { TextSizeButton } from '@/components/TextSizeButton';
 import { errorMessage, logAIError } from '@/lib/ai/errors';
-import { narrationSegments, splitParagraphs } from '@/lib/audio/segment';
+import { buildSegments } from '@/lib/audio/dialogue';
+import { splitParagraphs } from '@/lib/audio/segment';
 import { awaitingNextScene, choose, currentScene, needsScene, restartAdventure } from '@/lib/story/engine';
 import { touch } from '@/lib/story/factory';
 import { generateNextScene } from '@/lib/story/generate';
@@ -77,7 +78,8 @@ export default function AdventureScreen() {
   }, [story, continueStory]);
 
   const sceneText = story?.adventure ? (currentScene(story.adventure)?.text ?? '') : '';
-  const segments = useMemo(() => narrationSegments(sceneText), [sceneText]);
+  const draft = story?.draft;
+  const segments = useMemo(() => (draft ? buildSegments(sceneText, draft, settings.multiVoice) : []), [sceneText, draft, settings.multiVoice]);
   const narration = useNarration(segments, story?.language ?? 'en');
   const speaking = narration.active ? narration.state.paragraph : undefined;
 

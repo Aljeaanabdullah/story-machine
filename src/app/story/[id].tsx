@@ -12,7 +12,8 @@ import { OrnateCard } from '@/components/OrnateCard';
 import { IconButton, Screen } from '@/components/Screen';
 import { StoryArt, storyAccent } from '@/components/StoryArt';
 import { TextSizeButton } from '@/components/TextSizeButton';
-import { narrationSegments, splitParagraphs } from '@/lib/audio/segment';
+import { buildSegments } from '@/lib/audio/dialogue';
+import { splitParagraphs } from '@/lib/audio/segment';
 import { touch } from '@/lib/story/factory';
 import { useDraft } from '@/state/draft';
 import { useSettings } from '@/state/settings';
@@ -29,7 +30,7 @@ export default function StoryReader() {
   const mode = useModeText(story?.mode ?? 'short');
 
   const paragraphs = useMemo(() => splitParagraphs(story?.content ?? ''), [story?.content]);
-  const segments = useMemo(() => narrationSegments(story?.content ?? ''), [story?.content]);
+  const segments = useMemo(() => (story ? buildSegments(story.content ?? '', story.draft, settings.multiVoice) : []), [story, settings.multiVoice]);
   const narration = useNarration(segments, story?.language ?? 'en');
   const speaking = narration.active ? narration.state.paragraph : undefined;
 

@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
+import type { VoiceRole } from '@/lib/audio/types';
 import type { Narration } from '@/state/useNarration';
 import { useSettings } from '@/state/settings';
 import { colors, radius, TOUCH } from '@/theme';
@@ -9,6 +10,8 @@ import { GoldButton } from './GoldButton';
 import { PressableScale } from './PressableScale';
 
 type Props = { narration: Narration; label: string };
+
+export const ROLE_COLORS: Record<VoiceRole, string> = { narrator: colors.gold, hero: colors.blue, villain: colors.fire, companion: colors.success };
 
 function RoundButton({ icon, label, onPress, primary }: { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void; primary?: boolean }) {
   return (
@@ -58,6 +61,7 @@ export function NarrationBar({ narration, label }: Props) {
       )}
       <View style={styles.flex}>
         <View style={[styles.meta, { flexDirection: dir.row }]}>
+          {!loading && !paused && <View style={[styles.dot, { backgroundColor: ROLE_COLORS[state.role ?? 'narrator'] }]} />}
           <AppText variant="label" color={colors.gold} numberOfLines={1} style={styles.flex}>
             {status}
           </AppText>
@@ -90,6 +94,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(20,27,48,0.85)',
   },
   flex: { flex: 1 },
+  dot: { width: 8, height: 8, borderRadius: 4 },
   meta: { alignItems: 'center', gap: 8, marginBottom: 6 },
   track: { height: 4, borderRadius: 2, backgroundColor: colors.bg3, overflow: 'hidden' },
   fill: { height: 4, borderRadius: 2, backgroundColor: colors.gold },
