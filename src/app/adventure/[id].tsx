@@ -16,6 +16,7 @@ import { OrnateCard } from '@/components/OrnateCard';
 import { ProgressRunes } from '@/components/ProgressRunes';
 import { IconButton } from '@/components/Screen';
 import { SceneArt } from '@/components/SceneArt';
+import { SceneVideoBar, SceneVideoStage } from '@/components/SceneVideo';
 import { storyAccent } from '@/components/StoryArt';
 import { TextSizeButton } from '@/components/TextSizeButton';
 import { errorMessage, logAIError } from '@/lib/ai/errors';
@@ -29,6 +30,7 @@ import type { Story } from '@/lib/story/types';
 import { useSettings } from '@/state/settings';
 import { useStories } from '@/state/stories';
 import { useNarration } from '@/state/useNarration';
+import { useSceneVideo } from '@/state/useSceneVideo';
 import { useSoundscape } from '@/state/useSoundscape';
 import { colors, radius } from '@/theme';
 
@@ -95,6 +97,7 @@ export default function AdventureScreen() {
   }, [story, settings.multiVoice]);
   const narration = useNarration(view?.segments ?? NO_SEGMENTS, story?.language ?? 'en');
   useSoundscape(narration.state, view?.segments ?? NO_SEGMENTS, view?.ambience ?? null);
+  const video = useSceneVideo(story, view?.number ?? 0, view?.video, narration.stop);
   const speaking = narration.active ? narration.state.paragraph : undefined;
 
   if (!story?.adventure) {
@@ -158,7 +161,17 @@ export default function AdventureScreen() {
               </View>
             )}
             <OrnateCard style={styles.page} accent={accent}>
-              {view && <SceneArt draft={story.draft} visual={view.visual} motion={view.motion} style={styles.art} fadeTo="#131A2F" />}
+              {view &&
+                (video.watching && video.source ? (
+                  <SceneVideoStage
+                    source={video.source}
+                    style={styles.art}
+                    onClose={video.close}
+                    poster={<SceneArt draft={story.draft} visual={view.visual} style={StyleSheet.absoluteFill} fadeTo="#131A2F" />}
+                  />
+                ) : (
+                  <SceneArt draft={story.draft} visual={view.visual} motion={view.motion} style={styles.art} fadeTo="#131A2F" />
+                ))}
               <View style={styles.sceneHead}>
                 <AppText variant="caption" center color={accent}>
                   {s.scene} {scene.number}
@@ -169,6 +182,15 @@ export default function AdventureScreen() {
               </View>
               <View style={styles.body}>
                 <NarrationBar narration={narration} label={s.listenScene} />
+                <SceneVideoBar
+                  hasVideo={!!video.source}
+                  watching={video.watching}
+                  onWatch={video.watch}
+                  onImport={video.importVideo}
+                  onRemove={video.remove}
+                  onUseDemo={video.useDemo}
+                  message={video.message}
+                />
                 {(view?.paragraphs ?? []).map((p, i) => (
                   <AppText key={i} variant="story" lang={story.language} style={i === speaking && [styles.speaking, { borderColor: accent }]}>
                     {p}

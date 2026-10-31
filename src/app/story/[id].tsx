@@ -11,6 +11,7 @@ import { NarrationBar } from '@/components/NarrationBar';
 import { OrnateCard } from '@/components/OrnateCard';
 import { IconButton, Screen } from '@/components/Screen';
 import { SceneArt } from '@/components/SceneArt';
+import { SceneVideoBar, SceneVideoStage } from '@/components/SceneVideo';
 import { storyAccent } from '@/components/StoryArt';
 import { TextSizeButton } from '@/components/TextSizeButton';
 import type { VoiceSegment } from '@/lib/audio/types';
@@ -20,6 +21,7 @@ import { useDraft } from '@/state/draft';
 import { useSettings } from '@/state/settings';
 import { useStories } from '@/state/stories';
 import { useNarration } from '@/state/useNarration';
+import { useSceneVideo } from '@/state/useSceneVideo';
 import { useSoundscape } from '@/state/useSoundscape';
 import { colors, radius } from '@/theme';
 
@@ -36,6 +38,7 @@ export default function StoryReader() {
   const scene = useMemo(() => (story ? presentProse(story, settings.multiVoice) : undefined), [story, settings.multiVoice]);
   const narration = useNarration(scene?.segments ?? NO_SEGMENTS, story?.language ?? 'en');
   useSoundscape(narration.state, scene?.segments ?? NO_SEGMENTS, scene?.ambience ?? null);
+  const video = useSceneVideo(story, 1, scene?.video, narration.stop);
   const speaking = narration.active ? narration.state.paragraph : undefined;
 
   if (!story || !scene) {
@@ -86,7 +89,16 @@ export default function StoryReader() {
     >
       <Animated.View entering={calm ? undefined : FadeInDown.duration(600)}>
         <OrnateCard style={styles.page} accent={accent}>
-          <SceneArt draft={story.draft} visual={scene.visual} motion={scene.motion} style={styles.art} fadeTo="#131A2F" />
+          {video.watching && video.source ? (
+            <SceneVideoStage
+              source={video.source}
+              style={styles.art}
+              onClose={video.close}
+              poster={<SceneArt draft={story.draft} visual={scene.visual} style={StyleSheet.absoluteFill} fadeTo="#131A2F" />}
+            />
+          ) : (
+            <SceneArt draft={story.draft} visual={scene.visual} motion={scene.motion} style={styles.art} fadeTo="#131A2F" />
+          )}
           <View style={styles.head}>
             <AppText variant="caption" center color={accent}>
               {mode.title} · {date}
@@ -98,6 +110,15 @@ export default function StoryReader() {
           </View>
           <View style={styles.body}>
             <NarrationBar narration={narration} label={s.listenStory} />
+            <SceneVideoBar
+              hasVideo={!!video.source}
+              watching={video.watching}
+              onWatch={video.watch}
+              onImport={video.importVideo}
+              onRemove={video.remove}
+              onUseDemo={video.useDemo}
+              message={video.message}
+            />
             {scene.paragraphs.map((p, i) => (
               <AppText key={i} variant="story" lang={story.language} style={i === speaking && [styles.speaking, { borderColor: accent }]}>
                 {p}
