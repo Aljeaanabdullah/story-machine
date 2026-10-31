@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import type { Language } from '@/i18n/strings';
+import type { TTSProviderId } from '@/lib/audio/types';
+import { SPEECH_RATES } from '@/lib/audio/voices';
 import type { Story } from '@/lib/story/types';
 
 const STORIES_KEY = 'storyverse.stories.v1';
@@ -15,6 +17,12 @@ export type Settings = {
   model: string;
   /** Reading text size multiplier for story text. */
   textScale: number;
+  /** Text-to-speech engine for narration; falls back to device speech when unavailable. */
+  voiceProvider: TTSProviderId;
+  /** Distinct hero / villain / character voices instead of narrator only. */
+  multiVoice: boolean;
+  /** Narration speed multiplier. */
+  speechRate: number;
 };
 
 export const TEXT_SCALES = [1, 1.15, 1.3] as const;
@@ -26,6 +34,9 @@ export const DEFAULT_SETTINGS: Settings = {
   haptics: true,
   model: '',
   textScale: 1,
+  voiceProvider: 'device',
+  multiVoice: true,
+  speechRate: 1,
 };
 
 function isStory(x: unknown): x is Story {
@@ -69,6 +80,9 @@ export async function loadSettings(): Promise<Settings | null> {
       haptics: parsed.haptics !== false,
       model: typeof parsed.model === 'string' ? parsed.model : '',
       textScale: (TEXT_SCALES as readonly number[]).includes(parsed.textScale as number) ? (parsed.textScale as number) : 1,
+      voiceProvider: parsed.voiceProvider === 'elevenlabs' ? 'elevenlabs' : 'device',
+      multiVoice: parsed.multiVoice !== false,
+      speechRate: (SPEECH_RATES as readonly number[]).includes(parsed.speechRate as number) ? (parsed.speechRate as number) : 1,
     };
   } catch {
     return null;

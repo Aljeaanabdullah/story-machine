@@ -12,6 +12,9 @@ import { OrnateCard } from '@/components/OrnateCard';
 import { Screen } from '@/components/Screen';
 import type { Language } from '@/i18n/strings';
 import { getAIConfig, hasApiKey, isFreeModel } from '@/lib/ai/config';
+import { isProviderAvailable } from '@/lib/audio';
+import type { TTSProviderId } from '@/lib/audio/types';
+import { SPEECH_RATES } from '@/lib/audio/voices';
 import { TEXT_SCALES } from '@/lib/storage';
 import { useSettings } from '@/state/settings';
 import { useStories } from '@/state/stories';
@@ -48,6 +51,10 @@ export default function SettingsScreen() {
     { id: 'en', label: s.english },
     { id: 'ar', label: s.arabic },
   ];
+  const voiceEngines: { id: TTSProviderId; label: string }[] = [
+    { id: 'device', label: s.voiceDevice },
+    { id: 'elevenlabs', label: s.voicePremium },
+  ];
 
   return (
     <Screen title={s.settingsTitle} back>
@@ -67,6 +74,25 @@ export default function SettingsScreen() {
           value={String(settings.textScale)}
           onChange={(v) => update({ textScale: Number(v) })}
         />
+      </OrnateCard>
+
+      <OrnateCard style={styles.card}>
+        <SectionLabel>{s.narration}</SectionLabel>
+        <AppText variant="caption">{s.voiceEngine}</AppText>
+        <ChipGroup options={voiceEngines} value={settings.voiceProvider} onChange={(voiceProvider) => update({ voiceProvider })} />
+        {!isProviderAvailable(settings.voiceProvider) && (
+          <AppText variant="caption" color={colors.fire}>
+            {s.voicePremiumNote}
+          </AppText>
+        )}
+        <ToggleRow label={s.multiVoice} desc={s.multiVoiceDesc} value={settings.multiVoice} onChange={(multiVoice) => update({ multiVoice })} />
+        <SectionLabel>{s.speechRate}</SectionLabel>
+        <ChipGroup
+          options={SPEECH_RATES.map((v) => ({ id: String(v), label: `${v}×` }))}
+          value={String(settings.speechRate)}
+          onChange={(v) => update({ speechRate: Number(v) })}
+        />
+        <AppText variant="caption">{s.narrationHint}</AppText>
       </OrnateCard>
 
       <OrnateCard style={styles.card}>

@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useRef, useState, type ComponentRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentRef } from 'react';
 import { AccessibilityInfo, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,18 +11,21 @@ import { ConfirmModal } from '@/components/ConfirmModal';
 import { ErrorPanel } from '@/components/ErrorPanel';
 import { GoldButton } from '@/components/GoldButton';
 import { LoadingOrb } from '@/components/LoadingOrb';
+import { NarrationBar } from '@/components/NarrationBar';
 import { OrnateCard } from '@/components/OrnateCard';
 import { ProgressRunes } from '@/components/ProgressRunes';
 import { IconButton } from '@/components/Screen';
 import { StoryArt, storyAccent } from '@/components/StoryArt';
 import { TextSizeButton } from '@/components/TextSizeButton';
 import { errorMessage, logAIError } from '@/lib/ai/errors';
+import { narrationSegments, splitParagraphs } from '@/lib/audio/segment';
 import { awaitingNextScene, choose, currentScene, needsScene, restartAdventure } from '@/lib/story/engine';
 import { touch } from '@/lib/story/factory';
 import { generateNextScene } from '@/lib/story/generate';
 import type { Story } from '@/lib/story/types';
 import { useSettings } from '@/state/settings';
 import { useStories } from '@/state/stories';
+import { useNarration } from '@/state/useNarration';
 import { colors, radius } from '@/theme';
 
 export default function AdventureScreen() {
@@ -72,6 +75,11 @@ export default function AdventureScreen() {
     }, 0);
     return () => clearTimeout(id);
   }, [story, continueStory]);
+
+  const sceneText = story?.adventure ? (currentScene(story.adventure)?.text ?? '') : '';
+  const segments = useMemo(() => narrationSegments(sceneText), [sceneText]);
+  const narration = useNarration(segments, story?.language ?? 'en');
+  const speaking = narration.active ? narration.state.paragraph : undefined;
 
   if (!story?.adventure) {
     return (
@@ -144,14 +152,12 @@ export default function AdventureScreen() {
                 </AppText>
               </View>
               <View style={styles.body}>
-                {scene.text
-                  .split(/\n\s*\n|\n/)
-                  .filter((p) => p.trim())
-                  .map((p, i) => (
-                    <AppText key={i} variant="story" lang={story.language}>
-                      {p.trim()}
-                    </AppText>
-                  ))}
+                <NarrationBar narration={narration} label={s.listenScene} />
+                {splitParagraphs(scene.text).map((p, i) => (
+                  <AppText key={i} variant="story" lang={story.language} style={i === speaking && [styles.speaking, { borderColor: accent }]}>
+                    {p}
+                  </AppText>
+                ))}
               </View>
             </OrnateCard>
 
@@ -225,5 +231,6 @@ const styles = StyleSheet.create({
   art: { height: 180, borderTopLeftRadius: radius.md, borderTopRightRadius: radius.md },
   sceneHead: { paddingHorizontal: 18, marginTop: -26, gap: 4 },
   body: { padding: 20, paddingTop: 12, gap: 14 },
+  speaking: { backgroundColor: 'rgba(214,180,119,0.08)', borderRadius: radius.sm, borderWidth: 1, paddingHorizontal: 10, marginHorizontal: -11 },
   loading: { alignItems: 'center', paddingVertical: 10 },
 });

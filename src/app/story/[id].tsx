@@ -7,14 +7,17 @@ import { AppText } from '@/components/AppText';
 import { ErrorPanel } from '@/components/ErrorPanel';
 import { GoldButton } from '@/components/GoldButton';
 import { useModeText } from '@/components/ModeCard';
+import { NarrationBar } from '@/components/NarrationBar';
 import { OrnateCard } from '@/components/OrnateCard';
 import { IconButton, Screen } from '@/components/Screen';
 import { StoryArt, storyAccent } from '@/components/StoryArt';
 import { TextSizeButton } from '@/components/TextSizeButton';
+import { narrationSegments, splitParagraphs } from '@/lib/audio/segment';
 import { touch } from '@/lib/story/factory';
 import { useDraft } from '@/state/draft';
 import { useSettings } from '@/state/settings';
 import { useStories } from '@/state/stories';
+import { useNarration } from '@/state/useNarration';
 import { colors, radius } from '@/theme';
 
 export default function StoryReader() {
@@ -25,14 +28,10 @@ export default function StoryReader() {
   const story = get(id);
   const mode = useModeText(story?.mode ?? 'short');
 
-  const paragraphs = useMemo(
-    () =>
-      (story?.content ?? '')
-        .split(/\n\s*\n|\n/)
-        .map((p) => p.trim())
-        .filter(Boolean),
-    [story?.content],
-  );
+  const paragraphs = useMemo(() => splitParagraphs(story?.content ?? ''), [story?.content]);
+  const segments = useMemo(() => narrationSegments(story?.content ?? ''), [story?.content]);
+  const narration = useNarration(segments, story?.language ?? 'en');
+  const speaking = narration.active ? narration.state.paragraph : undefined;
 
   if (!story) {
     return (
@@ -93,8 +92,9 @@ export default function StoryReader() {
             <View style={styles.rule} />
           </View>
           <View style={styles.body}>
+            <NarrationBar narration={narration} label={s.listenStory} />
             {paragraphs.map((p, i) => (
-              <AppText key={i} variant="story" lang={story.language}>
+              <AppText key={i} variant="story" lang={story.language} style={i === speaking && [styles.speaking, { borderColor: accent }]}>
                 {p}
               </AppText>
             ))}
@@ -117,4 +117,5 @@ const styles = StyleSheet.create({
   head: { paddingHorizontal: 18, paddingTop: 4, marginTop: -28, gap: 6, alignItems: 'center' },
   rule: { width: 80, height: 1, backgroundColor: colors.goldDim, marginTop: 6 },
   body: { padding: 20, gap: 16 },
+  speaking: { backgroundColor: 'rgba(214,180,119,0.08)', borderRadius: radius.sm, borderWidth: 1, paddingHorizontal: 10, marginHorizontal: -11 },
 });
