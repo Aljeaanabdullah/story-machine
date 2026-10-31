@@ -15,11 +15,12 @@ import { NarrationBar } from '@/components/NarrationBar';
 import { OrnateCard } from '@/components/OrnateCard';
 import { ProgressRunes } from '@/components/ProgressRunes';
 import { IconButton } from '@/components/Screen';
-import { StoryArt, storyAccent } from '@/components/StoryArt';
+import { SceneArt } from '@/components/SceneArt';
+import { storyAccent } from '@/components/StoryArt';
 import { TextSizeButton } from '@/components/TextSizeButton';
 import { errorMessage, logAIError } from '@/lib/ai/errors';
-import { buildSegments } from '@/lib/audio/dialogue';
-import { splitParagraphs } from '@/lib/audio/segment';
+import type { VoiceSegment } from '@/lib/audio/types';
+import { presentScene } from '@/lib/media/present';
 import { awaitingNextScene, choose, currentScene, needsScene, restartAdventure } from '@/lib/story/engine';
 import { touch } from '@/lib/story/factory';
 import { generateNextScene } from '@/lib/story/generate';
@@ -28,6 +29,8 @@ import { useSettings } from '@/state/settings';
 import { useStories } from '@/state/stories';
 import { useNarration } from '@/state/useNarration';
 import { colors, radius } from '@/theme';
+
+const NO_SEGMENTS: VoiceSegment[] = [];
 
 export default function AdventureScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -77,10 +80,11 @@ export default function AdventureScreen() {
     return () => clearTimeout(id);
   }, [story, continueStory]);
 
-  const sceneText = story?.adventure ? (currentScene(story.adventure)?.text ?? '') : '';
-  const draft = story?.draft;
-  const segments = useMemo(() => (draft ? buildSegments(sceneText, draft, settings.multiVoice) : []), [sceneText, draft, settings.multiVoice]);
-  const narration = useNarration(segments, story?.language ?? 'en');
+  const view = useMemo(() => {
+    const current = story?.adventure ? currentScene(story.adventure) : undefined;
+    return story && current ? presentScene(story, current, settings.multiVoice) : undefined;
+  }, [story, settings.multiVoice]);
+  const narration = useNarration(view?.segments ?? NO_SEGMENTS, story?.language ?? 'en');
   const speaking = narration.active ? narration.state.paragraph : undefined;
 
   if (!story?.adventure) {
@@ -144,7 +148,7 @@ export default function AdventureScreen() {
               </View>
             )}
             <OrnateCard style={styles.page} accent={accent}>
-              <StoryArt draft={story.draft} style={styles.art} fadeBottom fadeTo="#131A2F" />
+              {view && <SceneArt draft={story.draft} visual={view.visual} style={styles.art} fadeTo="#131A2F" />}
               <View style={styles.sceneHead}>
                 <AppText variant="caption" center color={accent}>
                   {s.scene} {scene.number}
@@ -155,7 +159,7 @@ export default function AdventureScreen() {
               </View>
               <View style={styles.body}>
                 <NarrationBar narration={narration} label={s.listenScene} />
-                {splitParagraphs(scene.text).map((p, i) => (
+                {(view?.paragraphs ?? []).map((p, i) => (
                   <AppText key={i} variant="story" lang={story.language} style={i === speaking && [styles.speaking, { borderColor: accent }]}>
                     {p}
                   </AppText>

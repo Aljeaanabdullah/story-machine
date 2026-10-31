@@ -25,6 +25,7 @@ export class NarrationPlayer {
   private token = 0;
   private state: NarrationState = { status: 'idle', index: 0, total: 0 };
   private listeners = new Set<() => void>();
+  private loadedKey = '';
 
   constructor(private provider: SpeechProvider) {}
 
@@ -39,6 +40,10 @@ export class NarrationPlayer {
 
   /** Replaces what will be read and with which engine. Stops anything playing. */
   load(segments: VoiceSegment[], settings: VoiceSettings, provider: SpeechProvider = this.provider) {
+    // Re-rendering with identical content (e.g. after saving the story) must not interrupt playback.
+    const key = JSON.stringify([segments, settings, provider.id]);
+    if (key === this.loadedKey && provider === this.provider) return;
+    this.loadedKey = key;
     this.halt();
     this.provider = provider;
     this.segments = segments;

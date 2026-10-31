@@ -1,5 +1,6 @@
 import type { ArchetypeId } from '@/data/catalog';
 import type { Language } from '@/i18n/strings';
+import type { SceneMedia } from '@/lib/media/types';
 
 export type StoryMode = 'short' | 'adventure' | 'bedtime';
 
@@ -41,6 +42,8 @@ export type Scene = {
   isEnding: boolean;
   /** One-sentence recap fed back to the model for continuity. */
   summary: string;
+  /** Optional visual / motion / video overrides (V2). Defaults are derived. */
+  media?: SceneMedia;
 };
 
 export type ChoiceRecord = { scene: number; index: number; text: string };
@@ -72,6 +75,8 @@ export type Story = {
   /** Full text for short and bedtime stories. */
   content?: string;
   adventure?: AdventureState;
+  /** Media overrides for short and bedtime stories, which are a single scene. */
+  media?: SceneMedia;
   saved: boolean;
 };
 

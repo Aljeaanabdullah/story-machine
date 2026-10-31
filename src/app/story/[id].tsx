@@ -10,16 +10,19 @@ import { useModeText } from '@/components/ModeCard';
 import { NarrationBar } from '@/components/NarrationBar';
 import { OrnateCard } from '@/components/OrnateCard';
 import { IconButton, Screen } from '@/components/Screen';
-import { StoryArt, storyAccent } from '@/components/StoryArt';
+import { SceneArt } from '@/components/SceneArt';
+import { storyAccent } from '@/components/StoryArt';
 import { TextSizeButton } from '@/components/TextSizeButton';
-import { buildSegments } from '@/lib/audio/dialogue';
-import { splitParagraphs } from '@/lib/audio/segment';
+import type { VoiceSegment } from '@/lib/audio/types';
+import { presentProse } from '@/lib/media/present';
 import { touch } from '@/lib/story/factory';
 import { useDraft } from '@/state/draft';
 import { useSettings } from '@/state/settings';
 import { useStories } from '@/state/stories';
 import { useNarration } from '@/state/useNarration';
 import { colors, radius } from '@/theme';
+
+const NO_SEGMENTS: VoiceSegment[] = [];
 
 export default function StoryReader() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -29,12 +32,11 @@ export default function StoryReader() {
   const story = get(id);
   const mode = useModeText(story?.mode ?? 'short');
 
-  const paragraphs = useMemo(() => splitParagraphs(story?.content ?? ''), [story?.content]);
-  const segments = useMemo(() => (story ? buildSegments(story.content ?? '', story.draft, settings.multiVoice) : []), [story, settings.multiVoice]);
-  const narration = useNarration(segments, story?.language ?? 'en');
+  const scene = useMemo(() => (story ? presentProse(story, settings.multiVoice) : undefined), [story, settings.multiVoice]);
+  const narration = useNarration(scene?.segments ?? NO_SEGMENTS, story?.language ?? 'en');
   const speaking = narration.active ? narration.state.paragraph : undefined;
 
-  if (!story) {
+  if (!story || !scene) {
     return (
       <Screen back>
         {ready && <ErrorPanel message={s.errors.unknown} onBack={() => router.replace('/home')} />}
@@ -82,7 +84,7 @@ export default function StoryReader() {
     >
       <Animated.View entering={calm ? undefined : FadeInDown.duration(600)}>
         <OrnateCard style={styles.page} accent={accent}>
-          <StoryArt draft={story.draft} style={styles.art} fadeBottom fadeTo="#131A2F" />
+          <SceneArt draft={story.draft} visual={scene.visual} style={styles.art} fadeTo="#131A2F" />
           <View style={styles.head}>
             <AppText variant="caption" center color={accent}>
               {mode.title} · {date}
@@ -94,7 +96,7 @@ export default function StoryReader() {
           </View>
           <View style={styles.body}>
             <NarrationBar narration={narration} label={s.listenStory} />
-            {paragraphs.map((p, i) => (
+            {scene.paragraphs.map((p, i) => (
               <AppText key={i} variant="story" lang={story.language} style={i === speaking && [styles.speaking, { borderColor: accent }]}>
                 {p}
               </AppText>
