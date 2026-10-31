@@ -20,6 +20,7 @@ import { useDraft } from '@/state/draft';
 import { useSettings } from '@/state/settings';
 import { useStories } from '@/state/stories';
 import { useNarration } from '@/state/useNarration';
+import { useSoundscape } from '@/state/useSoundscape';
 import { colors, radius } from '@/theme';
 
 const NO_SEGMENTS: VoiceSegment[] = [];
@@ -34,6 +35,7 @@ export default function StoryReader() {
 
   const scene = useMemo(() => (story ? presentProse(story, settings.multiVoice) : undefined), [story, settings.multiVoice]);
   const narration = useNarration(scene?.segments ?? NO_SEGMENTS, story?.language ?? 'en');
+  useSoundscape(narration.state, scene?.segments ?? NO_SEGMENTS, scene?.ambience ?? null);
   const speaking = narration.active ? narration.state.paragraph : undefined;
 
   if (!story || !scene) {

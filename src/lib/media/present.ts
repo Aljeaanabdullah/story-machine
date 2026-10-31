@@ -1,6 +1,7 @@
 import { findWorld, GENRES, MOODS, nameOf } from '@/data/catalog';
 import { buildSegments } from '@/lib/audio/dialogue';
 import { splitParagraphs, splitSentences } from '@/lib/audio/segment';
+import { pickAmbience, type Ambience } from '@/lib/audio/sfx';
 import type { VoiceSegment } from '@/lib/audio/types';
 import type { Scene, Story, StoryDraft } from '@/lib/story/types';
 import type { CameraMove, MotionHint, SceneMedia, SceneTransition, SceneVideo, SceneVisual } from './types';
@@ -13,6 +14,8 @@ export type ScenePresentation = {
   isEnding: boolean;
   paragraphs: string[];
   segments: VoiceSegment[];
+  /** Background sound bed while the scene is narrated. */
+  ambience: Ambience | null;
   visual: SceneVisual;
   motion: MotionHint;
   video: SceneVideo;
@@ -86,6 +89,7 @@ function present(story: Story, key: string, number: number, title: string, text:
     isEnding,
     paragraphs: splitParagraphs(text),
     segments: buildSegments(text, story.draft, multiVoice),
+    ambience: pickAmbience(text, story.draft),
     ...resolveMedia(base, media),
   };
 }

@@ -29,6 +29,7 @@ import type { Story } from '@/lib/story/types';
 import { useSettings } from '@/state/settings';
 import { useStories } from '@/state/stories';
 import { useNarration } from '@/state/useNarration';
+import { useSoundscape } from '@/state/useSoundscape';
 import { colors, radius } from '@/theme';
 
 const NO_SEGMENTS: VoiceSegment[] = [];
@@ -93,6 +94,7 @@ export default function AdventureScreen() {
     return story && current ? presentScene(story, current, settings.multiVoice) : undefined;
   }, [story, settings.multiVoice]);
   const narration = useNarration(view?.segments ?? NO_SEGMENTS, story?.language ?? 'en');
+  useSoundscape(narration.state, view?.segments ?? NO_SEGMENTS, view?.ambience ?? null);
   const speaking = narration.active ? narration.state.paragraph : undefined;
 
   if (!story?.adventure) {
