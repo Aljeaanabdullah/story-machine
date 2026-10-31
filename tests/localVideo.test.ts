@@ -30,6 +30,17 @@ describe('story-to-video prompt', () => {
     expect(prompt).toMatch(/Keep the exact painted art style.*No text, no watermark/);
   });
 
+  it('earlier scenes do not borrow the current location; no doubled punctuation', () => {
+    const first = buildVideoPrompt(story, presentScene(story, story.adventure!.scenes[0], true));
+    expect(first).not.toContain('Location:');
+    expect(prompt).not.toMatch(/\.\.|\?\.|!\./);
+  });
+
+  it('motion follows what the shot shows, not just the sound bed', () => {
+    const p1 = presentScene(story, story.adventure!.scenes[1], true);
+    expect(buildVideoPrompt(story, { ...p1, ambience: 'wind' })).toMatch(/Motion: waves roll in/);
+  });
+
   it('stays within the server prompt limit even for long scenes', () => {
     const long = makeProseStory(draftFor('short'), 'T', `${words(400)}. ${words(400)}`);
     expect(buildVideoPrompt(long, presentProse(long, true)).length).toBeLessThan(1200);

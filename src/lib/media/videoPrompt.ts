@@ -1,7 +1,7 @@
 import { findWorld, GENRES, MOODS, nameOf } from '@/data/catalog';
 import { hashKey } from '@/lib/audio/cache';
 import { splitSentences } from '@/lib/audio/segment';
-import type { Ambience } from '@/lib/audio/sfx';
+import { pickAmbience, type Ambience } from '@/lib/audio/sfx';
 import type { Story } from '@/lib/story/types';
 import type { ScenePresentation } from './present';
 import type { CameraMove } from './types';
@@ -32,6 +32,8 @@ export function videoSeed(story: Pick<Story, 'id'>): number {
 }
 
 const clip = (s: string, max: number) => (s.length > max ? `${s.slice(0, max - 1).trimEnd()}…` : s);
+/** Parts are joined with ". ", so drop their own closing punctuation. */
+const bare = (s: string) => s.trim().replace(/[.!?؟…。]+$/u, '');
 
 /**
  * English prompt for a local image-to-video model, built from the scene, world,
@@ -46,16 +48,20 @@ export function buildVideoPrompt(story: Story, scene: Pick<ScenePresentation, 'n
   const genre = nameOf(GENRES, d.genre, 'en').toLowerCase();
   const moment = splitSentences(scene.paragraphs[0] ?? '')[0]?.trim() ?? '';
 
-  const choices = story.adventure?.choices ?? [];
-  const lastChoice = choices.filter((c) => c.scene < scene.number).at(-1);
-  const place = story.adventure?.memory.location?.trim();
+  const adv = story.adventure;
+  const lastChoice = (adv?.choices ?? []).filter((c) => c.scene < scene.number).at(-1);
+  // The adventure memory only knows where the hero is now, so only the latest scene uses it.
+  const isLatest = !!adv && scene.number === adv.scenes.at(-1)?.number;
+  const place = isLatest ? adv.memory.location?.trim() : undefined;
+  // What the shot shows matters more than the scene's overall sound bed.
+  const ambience = (moment && pickAmbience(moment, d)) || scene.ambience;
 
   return [
-    `A ${mood} cinematic ${genre} shot. Setting: ${world}`,
-    place && `Location: ${clip(place, 80)}`,
-    moment && `Moment: ${clip(moment, 200)}`,
-    lastChoice && `Just after the hero chose: ${clip(lastChoice.text, 100)}`,
-    `Motion: ${(scene.ambience && MOTION_FOR[scene.ambience]) || DEFAULT_MOTION}`,
+    `A ${mood} cinematic ${genre} shot. Setting: ${bare(world)}`,
+    place && `Location: ${bare(clip(place, 80))}`,
+    moment && `Moment: ${bare(clip(moment, 200))}`,
+    lastChoice && `Just after the hero chose: ${bare(clip(lastChoice.text, 100))}`,
+    `Motion: ${(ambience && MOTION_FOR[ambience]) || DEFAULT_MOTION}`,
     `Camera: ${CAMERA_FOR[scene.motion.camera]}`,
     'Keep the exact painted art style, colors, lighting and composition of the first frame. No text, no watermark',
   ]
