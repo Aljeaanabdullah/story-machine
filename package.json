@@ -59,7 +59,8 @@
     "test:live": "jest --config jest.live.config.js --runInBand --verbose",
     "check:secrets": "node scripts/check-secrets.js",
     "tts": "node -e \"require('child_process').spawn(process.platform==='win32'?'tools/tts-server/.venv/Scripts/python':'tools/tts-server/.venv/bin/python',['tools/tts-server/server.py'],{stdio:'inherit'})\"",
-    "sfx": "node scripts/gen-sfx.js"
+    "sfx": "node scripts/gen-sfx.js",
+    "video": "node -e \"require('child_process').spawn(process.platform==='win32'?'tools/video-server/.venv/Scripts/python':'tools/video-server/.venv/bin/python',['tools/video-server/server.py'],{stdio:'inherit'})\""
   },
   "private": true,
   "jest": {

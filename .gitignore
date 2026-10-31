@@ -55,3 +55,6 @@ screenshots/expo-qr.png
 tools/tts-server/.venv/
 tools/tts-server/voices/
 __pycache__/
+tools/video-server/.venv/
+tools/video-server/models/
+tools/video-server/outputs/
