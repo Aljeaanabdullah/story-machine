@@ -38,7 +38,7 @@ export default function StoryReader() {
   const scene = useMemo(() => (story ? presentProse(story, settings.multiVoice) : undefined), [story, settings.multiVoice]);
   const narration = useNarration(scene?.segments ?? NO_SEGMENTS, story?.language ?? 'en');
   useSoundscape(narration.state, scene?.segments ?? NO_SEGMENTS, scene?.ambience ?? null);
-  const video = useSceneVideo(story, 1, scene?.video, narration.stop);
+  const video = useSceneVideo(story, 1, scene?.video, narration.stop, scene);
   const speaking = narration.active ? narration.state.paragraph : undefined;
 
   if (!story || !scene) {
@@ -117,6 +117,9 @@ export default function StoryReader() {
               onImport={video.importVideo}
               onRemove={video.remove}
               onUseDemo={video.useDemo}
+              onGenerate={video.generate}
+              onCancelGenerate={video.cancelGenerate}
+              job={video.job}
               message={video.message}
             />
             {scene.paragraphs.map((p, i) => (

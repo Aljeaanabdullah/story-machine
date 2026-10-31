@@ -41,3 +41,20 @@ export function deleteImportedVideo(uri: string | undefined) {
     // already gone
   }
 }
+
+/**
+ * Keeps a locally generated clip with the story: on the phone it is downloaded into
+ * the documents folder so it plays without the PC; on web (or if the copy fails) the
+ * server URL is used directly.
+ */
+export async function saveGeneratedVideo(url: string, key: string): Promise<string> {
+  if (Platform.OS === 'web') return url;
+  try {
+    const dir = new Directory(Paths.document, 'scene-videos');
+    dir.create({ intermediates: true, idempotent: true });
+    const file = await File.downloadFileAsync(url, new File(dir, `${hashKey(key)}-ai-${Date.now().toString(36)}.mp4`), { idempotent: true });
+    return file.uri;
+  } catch {
+    return url;
+  }
+}

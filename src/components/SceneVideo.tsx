@@ -5,6 +5,7 @@ import { useState, type ReactNode } from 'react';
 import { ActivityIndicator, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { useSettings } from '@/state/settings';
+import type { VideoJobView } from '@/state/videoJobs';
 import { colors, radius, TOUCH } from '@/theme';
 import { AppText } from './AppText';
 import { GoldButton } from './GoldButton';
@@ -90,11 +91,35 @@ type BarProps = {
   onRemove: () => void;
   /** Offered when no video is attached and a bundled demo exists for this world. */
   onUseDemo?: () => void;
+  /** Offered when the free local AI video server is configured and the scene has world art. */
+  onGenerate?: () => void;
+  onCancelGenerate?: () => void;
+  job?: VideoJobView | null;
   message?: string | null;
 };
 
+function JobProgress({ job, onCancel }: { job: VideoJobView; onCancel?: () => void }) {
+  const { s, dir } = useSettings();
+  const label = s.aiVideoStages[job.stage] ?? s.aiVideoStages.starting;
+  const pct = job.stage === 'rendering' ? Math.round(job.progress * 100) : null;
+  return (
+    <View style={styles.job} accessibilityLiveRegion="polite">
+      <View style={[styles.barRow, { flexDirection: dir.row }]}>
+        <ActivityIndicator color={colors.gold} />
+        <AppText variant="caption" color={colors.text} style={styles.flex}>
+          {pct === null ? label : `${label} · ${pct}%`}
+        </AppText>
+        {onCancel && <GoldButton variant="ghost" icon="close" label={s.cancelAiVideo} onPress={onCancel} />}
+      </View>
+      <View style={styles.track}>
+        <View style={[styles.fill, { width: `${pct ?? 4}%` }, dir.row === 'row-reverse' && styles.fillRtl]} />
+      </View>
+    </View>
+  );
+}
+
 /** Watch Scene plus importing / removing an MP4 for the scene. */
-export function SceneVideoBar({ hasVideo, watching, onWatch, onImport, onRemove, onUseDemo, message }: BarProps) {
+export function SceneVideoBar({ hasVideo, watching, onWatch, onImport, onRemove, onUseDemo, onGenerate, onCancelGenerate, job, message }: BarProps) {
   const { s, dir } = useSettings();
   return (
     <View style={styles.bar}>
@@ -109,7 +134,19 @@ export function SceneVideoBar({ hasVideo, watching, onWatch, onImport, onRemove,
         />
         {hasVideo && <Control icon="trash-outline" label={s.removeVideo} onPress={onRemove} />}
       </View>
-      {!hasVideo && onUseDemo && <GoldButton variant="ghost" icon="sparkles-outline" label={s.useDemoClip} onPress={onUseDemo} />}
+      {job ? (
+        <JobProgress job={job} onCancel={onCancelGenerate} />
+      ) : (
+        onGenerate && (
+          <>
+            <GoldButton variant="secondary" icon="color-wand-outline" label={s.generateAiVideo} onPress={onGenerate} />
+            <AppText variant="caption" center color={colors.textDim}>
+              {s.aiVideoNote}
+            </AppText>
+          </>
+        )
+      )}
+      {!hasVideo && !job && onUseDemo && <GoldButton variant="ghost" icon="sparkles-outline" label={s.useDemoClip} onPress={onUseDemo} />}
       {message ? (
         <AppText variant="caption" center color={colors.textDim}>
           {message}
@@ -138,4 +175,8 @@ const styles = StyleSheet.create({
   bar: { gap: 6 },
   barRow: { gap: 8, alignItems: 'center' },
   flex: { flex: 1 },
+  job: { gap: 6, padding: 10, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, backgroundColor: 'rgba(11,16,32,0.55)' },
+  track: { height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.08)', overflow: 'hidden' },
+  fill: { height: 4, borderRadius: 2, backgroundColor: colors.gold },
+  fillRtl: { alignSelf: 'flex-end' },
 });

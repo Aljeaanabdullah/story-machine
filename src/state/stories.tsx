@@ -9,6 +9,8 @@ type StoriesContextValue = {
   ready: boolean;
   get: (id: string) => Story | undefined;
   upsert: (story: Story) => void;
+  /** Applies a change to the latest copy of a story (safe from async callbacks). */
+  update: (id: string, change: (story: Story) => Story) => void;
   remove: (id: string) => void;
   clearAll: () => void;
 };
@@ -43,13 +45,17 @@ export function StoriesProvider({ children }: { children: ReactNode }) {
     setStories((prev) => [story, ...prev.filter((s) => s.id !== story.id)]);
   }, []);
 
+  const update = useCallback((id: string, change: (story: Story) => Story) => {
+    setStories((prev) => prev.map((s) => (s.id === id ? change(s) : s)));
+  }, []);
+
   const remove = useCallback((id: string) => {
     setStories((prev) => prev.filter((s) => s.id !== id));
   }, []);
 
   const clearAll = useCallback(() => setStories([]), []);
 
-  const value = useMemo(() => ({ stories, ready, get, upsert, remove, clearAll }), [stories, ready, get, upsert, remove, clearAll]);
+  const value = useMemo(() => ({ stories, ready, get, upsert, update, remove, clearAll }), [stories, ready, get, upsert, update, remove, clearAll]);
   return <StoriesContext.Provider value={value}>{children}</StoriesContext.Provider>;
 }
 

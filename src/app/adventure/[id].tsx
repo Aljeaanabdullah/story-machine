@@ -97,7 +97,7 @@ export default function AdventureScreen() {
   }, [story, settings.multiVoice]);
   const narration = useNarration(view?.segments ?? NO_SEGMENTS, story?.language ?? 'en');
   useSoundscape(narration.state, view?.segments ?? NO_SEGMENTS, view?.ambience ?? null);
-  const video = useSceneVideo(story, view?.number ?? 0, view?.video, narration.stop);
+  const video = useSceneVideo(story, view?.number ?? 0, view?.video, narration.stop, view);
   const speaking = narration.active ? narration.state.paragraph : undefined;
 
   if (!story?.adventure) {
@@ -189,6 +189,9 @@ export default function AdventureScreen() {
                   onImport={video.importVideo}
                   onRemove={video.remove}
                   onUseDemo={video.useDemo}
+                  onGenerate={video.generate}
+                  onCancelGenerate={video.cancelGenerate}
+                  job={video.job}
                   message={video.message}
                 />
                 {(view?.paragraphs ?? []).map((p, i) => (

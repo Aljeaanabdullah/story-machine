@@ -32,6 +32,15 @@ Everything here is free. There are no subscriptions, no card, and no paid API ca
 
 Details (Arabic): [docs/REPORT-V3-ar.md](docs/REPORT-V3-ar.md).
 
+## Version 4: real local AI video
+
+- **Generate AI Video** turns the scene's world painting into a real image-to-video clip using **Wan2.2 TI2V-5B** (Apache-2.0) on your own NVIDIA GPU, through [tools/video-server](tools/video-server/README.md) (`npm run video`). It is free, uses no cloud, and never renders automatically.
+- On an 8 GB RTX 5070 Laptop: 832×480, 81 frames (3.4 s), about 6.5–7 minutes per clip, 6.84 GB peak VRAM. Sample: [docs/ai-video](docs/ai-video).
+- Prompts are built from the world, location, scene moment, the player's last choice, the ambience motion and the camera move. One seed per story keeps the look consistent.
+- The app has a queue, progress, cancel and a cache. If the GPU runs out of memory it retries at a smaller size, and if the server is down it falls back to the image. The server answers home-network clients only.
+
+Details (Arabic): [docs/REPORT-V4-ar.md](docs/REPORT-V4-ar.md).
+
 ## Setup
 
 ```bash
@@ -63,11 +72,12 @@ Only models ending in `:free` are accepted. The model can also be changed in **S
 | Command | What it does |
 |---|---|
 | `npm start` | Sync artwork slots, then start Expo |
-| `npm test` | 91 unit/integration tests (mocked network, no key needed) |
+| `npm test` | 186 unit/integration tests (mocked network, no key needed) |
 | `npm run test:live` | Real OpenRouter run: 3 stories + a full Arabic adventure (needs `.env.local`; ~10 free requests) |
 | `npm run typecheck` / `npm run lint` | TypeScript / ESLint |
 | `npm run check:secrets` | Verify no keys are tracked by git |
 | `npm run art` | Re-scan `assets/art/` after adding illustrations |
+| `npm run tts` / `npm run video` | Local Piper voice server / local Wan2.2 video server |
 
 ## Artwork
 
