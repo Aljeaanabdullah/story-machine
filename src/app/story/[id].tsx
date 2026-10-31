@@ -84,7 +84,7 @@ export default function StoryReader() {
     >
       <Animated.View entering={calm ? undefined : FadeInDown.duration(600)}>
         <OrnateCard style={styles.page} accent={accent}>
-          <SceneArt draft={story.draft} visual={scene.visual} style={styles.art} fadeTo="#131A2F" />
+          <SceneArt draft={story.draft} visual={scene.visual} motion={scene.motion} style={styles.art} fadeTo="#131A2F" />
           <View style={styles.head}>
             <AppText variant="caption" center color={accent}>
               {mode.title} · {date}

@@ -21,6 +21,7 @@ import { TextSizeButton } from '@/components/TextSizeButton';
 import { errorMessage, logAIError } from '@/lib/ai/errors';
 import type { VoiceSegment } from '@/lib/audio/types';
 import { presentScene } from '@/lib/media/present';
+import type { SceneTransition } from '@/lib/media/types';
 import { awaitingNextScene, choose, currentScene, needsScene, restartAdventure } from '@/lib/story/engine';
 import { touch } from '@/lib/story/factory';
 import { generateNextScene } from '@/lib/story/generate';
@@ -31,6 +32,13 @@ import { useNarration } from '@/state/useNarration';
 import { colors, radius } from '@/theme';
 
 const NO_SEGMENTS: VoiceSegment[] = [];
+
+/** Entering animation for a scene, from its motion hint. */
+function sceneEntering(transition: SceneTransition | undefined) {
+  if (transition === 'dissolve') return FadeIn.duration(1200);
+  if (transition === 'fade') return FadeIn.duration(700);
+  return FadeInDown.duration(600);
+}
 
 export default function AdventureScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -136,7 +144,7 @@ export default function AdventureScreen() {
 
       <ScrollView ref={scrollRef} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]} showsVerticalScrollIndicator={false}>
         {scene && (
-          <Animated.View key={scene.number} entering={calm ? undefined : FadeInDown.duration(600)} style={styles.gap}>
+          <Animated.View key={scene.number} entering={calm ? undefined : sceneEntering(view?.motion.transition)} style={styles.gap}>
             {previousChoice && (
               <View style={[styles.prevChoice, { flexDirection: dir.row }]}>
                 <AppText variant="caption" color={colors.gold}>
@@ -148,7 +156,7 @@ export default function AdventureScreen() {
               </View>
             )}
             <OrnateCard style={styles.page} accent={accent}>
-              {view && <SceneArt draft={story.draft} visual={view.visual} style={styles.art} fadeTo="#131A2F" />}
+              {view && <SceneArt draft={story.draft} visual={view.visual} motion={view.motion} style={styles.art} fadeTo="#131A2F" />}
               <View style={styles.sceneHead}>
                 <AppText variant="caption" center color={accent}>
                   {s.scene} {scene.number}
