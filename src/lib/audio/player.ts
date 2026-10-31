@@ -1,4 +1,4 @@
-import type { SpeechProvider, VoiceRole, VoiceSegment } from './types';
+import type { SpeechProvider, TTSProviderId, VoiceRole, VoiceSegment } from './types';
 import { speakOptionsFor, type VoiceSettings } from './voices';
 
 export type NarrationStatus = 'idle' | 'loading' | 'playing' | 'paused' | 'done' | 'error';
@@ -10,6 +10,8 @@ export type NarrationState = {
   total: number;
   role?: VoiceRole;
   paragraph?: number;
+  /** Engine speaking the current segment (device speech when a neural provider fell back). */
+  engine?: TTSProviderId;
 };
 
 /**
@@ -59,6 +61,7 @@ export class NarrationPlayer {
     const token = ++this.token;
     this.set({ status: 'loading', index: 0, total: this.segments.length });
     try {
+      await this.provider.prepare?.();
       this.voices = await this.provider.listVoices(this.settings.language);
     } catch {
       this.voices = [];
@@ -94,8 +97,11 @@ export class NarrationPlayer {
       return;
     }
     const token = ++this.token;
-    this.set({ status: 'playing', index, total: this.segments.length, role: segment.role, paragraph: segment.paragraph });
-    this.provider.speak(segment.text, speakOptionsFor(segment.role, this.voices, this.settings), {
+    const options = (s: VoiceSegment) => speakOptionsFor(s.role, this.voices, this.settings, s.emotion);
+    this.set({ status: 'playing', index, total: this.segments.length, role: segment.role, paragraph: segment.paragraph, engine: this.provider.activeId?.() ?? this.provider.id });
+    const next = this.segments[index + 1];
+    if (next) this.provider.prefetch?.(next.text, options(next));
+    this.provider.speak(segment.text, options(segment), {
       onDone: () => {
         if (token === this.token) this.speakAt(index + 1);
       },

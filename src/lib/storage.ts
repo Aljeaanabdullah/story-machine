@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import type { Language } from '@/i18n/strings';
 import type { TTSProviderId } from '@/lib/audio/types';
-import { SPEECH_RATES } from '@/lib/audio/voices';
+import { SPEECH_RATES, VOLUME_STEPS } from '@/lib/audio/voices';
 import type { Story } from '@/lib/story/types';
 
 const STORIES_KEY = 'storyverse.stories.v1';
@@ -23,6 +23,10 @@ export type Settings = {
   multiVoice: boolean;
   /** Narration speed multiplier. */
   speechRate: number;
+  /** Mixer levels, 0–1. */
+  voiceVolume: number;
+  ambienceVolume: number;
+  sfxVolume: number;
 };
 
 export const TEXT_SCALES = [1, 1.15, 1.3] as const;
@@ -37,6 +41,9 @@ export const DEFAULT_SETTINGS: Settings = {
   voiceProvider: 'device',
   multiVoice: true,
   speechRate: 1,
+  voiceVolume: 1,
+  ambienceVolume: 0.5,
+  sfxVolume: 0.75,
 };
 
 function isStory(x: unknown): x is Story {
@@ -73,6 +80,7 @@ export async function loadSettings(): Promise<Settings | null> {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<Settings>;
     const lang = (v: unknown): Language => (v === 'ar' ? 'ar' : 'en');
+    const volume = (v: unknown, fallback: number) => ((VOLUME_STEPS as readonly number[]).includes(v as number) ? (v as number) : fallback);
     return {
       uiLanguage: lang(parsed.uiLanguage),
       storyLanguage: lang(parsed.storyLanguage),
@@ -80,9 +88,12 @@ export async function loadSettings(): Promise<Settings | null> {
       haptics: parsed.haptics !== false,
       model: typeof parsed.model === 'string' ? parsed.model : '',
       textScale: (TEXT_SCALES as readonly number[]).includes(parsed.textScale as number) ? (parsed.textScale as number) : 1,
-      voiceProvider: parsed.voiceProvider === 'elevenlabs' ? 'elevenlabs' : 'device',
+      voiceProvider: parsed.voiceProvider === 'neural' || parsed.voiceProvider === 'elevenlabs' ? parsed.voiceProvider : 'device',
       multiVoice: parsed.multiVoice !== false,
       speechRate: (SPEECH_RATES as readonly number[]).includes(parsed.speechRate as number) ? (parsed.speechRate as number) : 1,
+      voiceVolume: volume(parsed.voiceVolume, DEFAULT_SETTINGS.voiceVolume),
+      ambienceVolume: volume(parsed.ambienceVolume, DEFAULT_SETTINGS.ambienceVolume),
+      sfxVolume: volume(parsed.sfxVolume, DEFAULT_SETTINGS.sfxVolume),
     };
   } catch {
     return null;

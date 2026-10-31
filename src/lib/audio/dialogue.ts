@@ -1,9 +1,9 @@
 import type { StoryDraft } from '@/lib/story/types';
-import { narrationSegments, splitParagraphs, splitSentences } from './segment';
-import type { VoiceRole, VoiceSegment } from './types';
+import { splitParagraphs, splitSentences } from './segment';
+import type { Emotion, VoiceRole, VoiceSegment } from './types';
 
 /** Who can be recognised as a speaker in the text around a line of dialogue. */
-export type Cast = { hero: string[]; villain: string[] };
+export type Cast = { hero: string[]; villain: string[]; /** Bedtime: everything is read gently. */ calm?: boolean };
 
 const HERO_WORDS = ['the hero', 'البطل', 'البطلة'];
 const VILLAIN_WORDS = [
@@ -19,7 +19,20 @@ export function castFor(draft: StoryDraft): Cast {
     .split(/\s+/)
     .filter((w) => w.length >= 2);
   // Bedtime stories have no real villains; every other speaker is a friendly character.
-  return { hero: [...names, ...HERO_WORDS], villain: draft.mode === 'bedtime' ? [] : VILLAIN_WORDS };
+  const bedtime = draft.mode === 'bedtime';
+  return { hero: [...names, ...HERO_WORDS], villain: bedtime ? [] : VILLAIN_WORDS, calm: bedtime };
+}
+
+const WHISPER = /whisper|murmur|breathed|softly|همس|تمتم|بصوت خافت|هامس/i;
+const FEAR = /trembl|afraid|scream|gasp|shiver|terrified|frightened|خائف|خائفة|ارتجف|مرتجف|صرخ|بخوف|مذعور|مرتعب/i;
+const SHOUT = /shout|cried|yelled|roared|bellowed|exclaimed|صاح|هتف|زأر|صرخ بحماس/i;
+
+/** Delivery for a line of dialogue from its punctuation and the speech tag around it. */
+export function detectEmotion(line: string, context: string, calm = false): Emotion {
+  if (WHISPER.test(context)) return 'whisper';
+  if (FEAR.test(context)) return 'fearful';
+  if (SHOUT.test(context) || /!/.test(line)) return calm ? 'calm' : 'excited';
+  return calm ? 'calm' : 'neutral';
 }
 
 const QUOTE = /“([^”]+)”|"([^"]+)"|«([^»]+)»/g;
@@ -71,7 +84,7 @@ export function dialogueSegments(text: string, cast: Cast): VoiceSegment[] {
   const out: VoiceSegment[] = [];
   splitParagraphs(text).forEach((p, paragraph) => {
     const narrate = (chunk: string) => {
-      for (const s of splitSentences(chunk)) out.push({ role: 'narrator', kind: 'narration', text: s, paragraph });
+      for (const s of splitSentences(chunk)) out.push({ role: 'narrator', kind: 'narration', text: s, paragraph, emotion: cast.calm ? 'calm' : 'neutral' });
     };
     const quotes = [...p.matchAll(QUOTE)];
     let cursor = 0;
@@ -84,10 +97,13 @@ export function dialogueSegments(text: string, cast: Cast): VoiceSegment[] {
       narrate(p.slice(cursor, start));
       cursor = end;
       if (!/[\p{L}\p{N}]/u.test(line)) return;
-      const role = attributeSpeaker(contextBefore(p.slice(0, start)), tagAfter(p.slice(end, nextStart)), cast) ?? previous ?? 'companion';
+      const before = contextBefore(p.slice(0, start));
+      const tag = tagAfter(p.slice(end, nextStart));
+      const role = attributeSpeaker(before, tag, cast) ?? previous ?? 'companion';
       previous = role;
+      const emotion = detectEmotion(line, `${tag} ${before}`, cast.calm);
       const parts = line.length > 280 ? splitSentences(line) : [line];
-      for (const t of parts) out.push({ role, kind: 'dialogue', text: t, paragraph });
+      for (const t of parts) out.push({ role, kind: 'dialogue', text: t, paragraph, emotion });
     });
     narrate(p.slice(cursor));
   });
@@ -96,5 +112,7 @@ export function dialogueSegments(text: string, cast: Cast): VoiceSegment[] {
 
 /** Segments for reading: dialogue-aware when character voices are on, narrator-only otherwise. */
 export function buildSegments(text: string, draft: StoryDraft, multiVoice: boolean): VoiceSegment[] {
-  return multiVoice ? dialogueSegments(text, castFor(draft)) : narrationSegments(text);
+  const segments = dialogueSegments(text, castFor(draft));
+  // Narrator-only still keeps the emotion hints; only the voice role collapses.
+  return multiVoice ? segments : segments.map((s) => ({ ...s, role: 'narrator' as const }));
 }

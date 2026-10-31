@@ -25,6 +25,7 @@ function say(text: string, options: SpeakOptions, callbacks: SpeakCallbacks, ret
     language: LOCALE[options.language],
     pitch: options.pitch,
     rate: options.rate,
+    volume: options.volume,
     voice: options.voice,
     onDone: callbacks.onDone,
     onError: (e: unknown) => {

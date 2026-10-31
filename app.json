@@ -43,7 +43,9 @@
           "supportsRTL": false
         }
       ],
-      "expo-image"
+      "expo-image",
+      "expo-audio",
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true

@@ -17,8 +17,8 @@ export function useNarration(segments: VoiceSegment[], language: Language) {
   const state = useSyncExternalStore(player.subscribe, player.getState, player.getState);
 
   useEffect(() => {
-    player.load(segments, { language, multiVoice: settings.multiVoice, rate: settings.speechRate }, getSpeechProvider(settings.voiceProvider));
-  }, [player, segments, language, settings.multiVoice, settings.speechRate, settings.voiceProvider]);
+    player.load(segments, { language, multiVoice: settings.multiVoice, rate: settings.speechRate, volume: settings.voiceVolume }, getSpeechProvider(settings.voiceProvider));
+  }, [player, segments, language, settings.multiVoice, settings.speechRate, settings.voiceVolume, settings.voiceProvider]);
 
   useEffect(() => () => player.stop(), [player]);
   useFocusEffect(useCallback(() => () => player.stop(), [player]));

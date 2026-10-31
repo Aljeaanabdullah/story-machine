@@ -63,7 +63,7 @@ describe('settings persistence and language selection', () => {
 
   it('sanitises unknown values', async () => {
     await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify({ uiLanguage: 'fr', storyLanguage: 42, reduceMotion: 'yes', haptics: false, model: 7, voiceProvider: 'robot', multiVoice: 'no', speechRate: 9 }));
-    expect(await loadSettings()).toEqual({ uiLanguage: 'en', storyLanguage: 'en', reduceMotion: false, haptics: false, model: '', textScale: 1, voiceProvider: 'device', multiVoice: true, speechRate: 1 });
+    expect(await loadSettings()).toEqual({ uiLanguage: 'en', storyLanguage: 'en', reduceMotion: false, haptics: false, model: '', textScale: 1, voiceProvider: 'device', multiVoice: true, speechRate: 1, voiceVolume: 1, ambienceVolume: 0.5, sfxVolume: 0.75 });
   });
 
   it('survives corrupt settings', async () => {

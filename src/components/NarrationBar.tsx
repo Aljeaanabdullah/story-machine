@@ -65,6 +65,11 @@ export function NarrationBar({ narration, label }: Props) {
           <AppText variant="label" color={colors.gold} numberOfLines={1} style={styles.flex}>
             {status}
           </AppText>
+          {state.engine && !loading && (
+            <AppText variant="caption" color={state.engine === 'neural' ? colors.success : colors.textDim}>
+              {state.engine === 'neural' ? s.engineNeural : s.engineDevice}
+            </AppText>
+          )}
           <AppText variant="caption" lang="en">
             {Math.min(state.index + 1, state.total)}/{state.total}
           </AppText>

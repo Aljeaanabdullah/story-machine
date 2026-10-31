@@ -14,7 +14,7 @@ import type { Language } from '@/i18n/strings';
 import { getAIConfig, hasApiKey, isFreeModel } from '@/lib/ai/config';
 import { isProviderAvailable } from '@/lib/audio';
 import type { TTSProviderId } from '@/lib/audio/types';
-import { SPEECH_RATES } from '@/lib/audio/voices';
+import { SPEECH_RATES, VOLUME_STEPS } from '@/lib/audio/voices';
 import { TEXT_SCALES } from '@/lib/storage';
 import { useSettings } from '@/state/settings';
 import { useStories } from '@/state/stories';
@@ -53,6 +53,7 @@ export default function SettingsScreen() {
   ];
   const voiceEngines: { id: TTSProviderId; label: string }[] = [
     { id: 'device', label: s.voiceDevice },
+    { id: 'neural', label: s.voiceNeural },
     { id: 'elevenlabs', label: s.voicePremium },
   ];
 
@@ -80,9 +81,10 @@ export default function SettingsScreen() {
         <SectionLabel>{s.narration}</SectionLabel>
         <AppText variant="caption">{s.voiceEngine}</AppText>
         <ChipGroup options={voiceEngines} value={settings.voiceProvider} onChange={(voiceProvider) => update({ voiceProvider })} />
+        {settings.voiceProvider === 'neural' && <AppText variant="caption">{s.voiceNeuralHint}</AppText>}
         {!isProviderAvailable(settings.voiceProvider) && (
           <AppText variant="caption" color={colors.fire}>
-            {s.voicePremiumNote}
+            {settings.voiceProvider === 'neural' ? s.voiceNeuralNote : s.voicePremiumNote}
           </AppText>
         )}
         <ToggleRow label={s.multiVoice} desc={s.multiVoiceDesc} value={settings.multiVoice} onChange={(multiVoice) => update({ multiVoice })} />
@@ -93,6 +95,28 @@ export default function SettingsScreen() {
           onChange={(v) => update({ speechRate: Number(v) })}
         />
         <AppText variant="caption">{s.narrationHint}</AppText>
+      </OrnateCard>
+
+      <OrnateCard style={styles.card}>
+        <SectionLabel>{s.mixer}</SectionLabel>
+        {(
+          [
+            ['voiceVolume', s.voiceVolume],
+            ['ambienceVolume', s.ambienceVolume],
+            ['sfxVolume', s.sfxVolume],
+          ] as const
+        ).map(([key, label]) => (
+          <View key={key} style={styles.mixRow}>
+            <AppText variant="caption" color={colors.gold}>
+              {label}
+            </AppText>
+            <ChipGroup
+              options={VOLUME_STEPS.map((v) => ({ id: String(v), label: `${Math.round(v * 100)}%` }))}
+              value={String(settings[key])}
+              onChange={(v) => update({ [key]: Number(v) })}
+            />
+          </View>
+        ))}
       </OrnateCard>
 
       <OrnateCard style={styles.card}>
@@ -174,5 +198,6 @@ const styles = StyleSheet.create({
   toggle: { alignItems: 'center', gap: 12, minHeight: 48 },
   flex: { flex: 1 },
   row: { gap: 10 },
+  mixRow: { gap: 6 },
   keyRow: { gap: 10, alignItems: 'center', marginTop: 6 },
 });

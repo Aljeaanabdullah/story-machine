@@ -1,5 +1,5 @@
 import type { Language } from '@/i18n/strings';
-import type { SpeakOptions, VoiceRole } from './types';
+import type { Emotion, SpeakOptions, VoiceRole } from './types';
 
 export type VoiceProfile = {
   pitch: number;
@@ -16,16 +16,33 @@ export const VOICE_PROFILES: Record<VoiceRole, VoiceProfile> = {
   companion: { pitch: 1.3, rate: 1.05, voiceSlot: 3 },
 };
 
+/** How each emotion bends a device voice (pitch, rate, volume multipliers). */
+export const EMOTION_SHAPES: Record<Emotion, { pitch: number; rate: number; volume: number }> = {
+  neutral: { pitch: 1, rate: 1, volume: 1 },
+  excited: { pitch: 1.05, rate: 1.08, volume: 1 },
+  fearful: { pitch: 1.06, rate: 1.05, volume: 0.9 },
+  whisper: { pitch: 0.98, rate: 0.92, volume: 0.6 },
+  calm: { pitch: 0.98, rate: 0.92, volume: 0.95 },
+};
+
 export const SPEECH_RATES = [0.85, 1, 1.15] as const;
+export const VOLUME_STEPS = [0, 0.25, 0.5, 0.75, 1] as const;
 
-export type VoiceSettings = { language: Language; multiVoice: boolean; rate: number };
+export type VoiceSettings = { language: Language; multiVoice: boolean; rate: number; volume?: number };
 
-export function speakOptionsFor(role: VoiceRole, voices: string[], settings: VoiceSettings): SpeakOptions {
-  const profile = VOICE_PROFILES[settings.multiVoice ? role : 'narrator'];
+const round = (n: number) => Math.round(n * 100) / 100;
+
+export function speakOptionsFor(role: VoiceRole, voices: string[], settings: VoiceSettings, emotion: Emotion = 'neutral'): SpeakOptions {
+  const effective = settings.multiVoice ? role : 'narrator';
+  const profile = VOICE_PROFILES[effective];
+  const shape = EMOTION_SHAPES[emotion];
   return {
     language: settings.language,
-    pitch: profile.pitch,
-    rate: Math.round(profile.rate * settings.rate * 100) / 100,
+    role: effective,
+    emotion,
+    pitch: round(profile.pitch * shape.pitch),
+    rate: round(profile.rate * settings.rate * shape.rate),
+    volume: round((settings.volume ?? 1) * shape.volume),
     voice: voices.length ? voices[profile.voiceSlot % voices.length] : undefined,
   };
 }

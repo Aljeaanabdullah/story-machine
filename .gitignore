@@ -50,3 +50,8 @@ design-references/
 
 # local dev-server QR (contains LAN address)
 screenshots/expo-qr.png
+
+# local neural TTS server (Python env + downloaded voice models)
+tools/tts-server/.venv/
+tools/tts-server/voices/
+__pycache__/
