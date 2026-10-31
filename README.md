@@ -21,6 +21,17 @@ Expo Router. Stories are generated with free OpenRouter models. Built for the CO
 
 Details (Arabic): [docs/REPORT-V2-ar.md](docs/REPORT-V2-ar.md).
 
+## Version 3: free cinematic upgrade
+
+Everything here is free. There are no subscriptions, no card, and no paid API calls.
+
+- **Neural voices**: [tools/tts-server](tools/tts-server/README.md) runs open-source Piper on your PC (`npm run tts`), with a different voice per role in English, one Arabic voice with pitch-shifted roles, and emotion hints. Audio is cached on the phone. Device speech is the automatic fallback. Samples: [docs/voice-samples](docs/voice-samples).
+- **Sound**: 10 original synthesised ambience loops and effects (`npm run sfx`) that duck under voices. Voice, ambience and effects volumes are set separately.
+- **Scene video**: MP4 playback with expo-video (watch, pause, replay, error, and image fallback) and MP4 import. A 5 s demo clip is rendered free with FFmpeg ([scripts/make-demo-video.js](scripts/make-demo-video.js)). It is not AI video, because no free, card-free image-to-video API exists today.
+- **Motion**: parallax fog, light motes and a scene light sweep, all off with reduced motion.
+
+Details (Arabic): [docs/REPORT-V3-ar.md](docs/REPORT-V3-ar.md).
+
 ## Setup
 
 ```bash
