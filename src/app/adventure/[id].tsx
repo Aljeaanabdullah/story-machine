@@ -170,7 +170,7 @@ export default function AdventureScreen() {
                     poster={<SceneArt draft={story.draft} visual={view.visual} style={StyleSheet.absoluteFill} fadeTo="#131A2F" />}
                   />
                 ) : (
-                  <SceneArt draft={story.draft} visual={view.visual} motion={view.motion} style={styles.art} fadeTo="#131A2F" />
+                  <SceneArt draft={story.draft} visual={view.visual} motion={view.motion} atmosphere={view.atmosphere} style={styles.art} fadeTo="#131A2F" />
                 ))}
               <View style={styles.sceneHead}>
                 <AppText variant="caption" center color={accent}>

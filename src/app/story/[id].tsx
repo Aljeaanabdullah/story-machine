@@ -97,7 +97,7 @@ export default function StoryReader() {
               poster={<SceneArt draft={story.draft} visual={scene.visual} style={StyleSheet.absoluteFill} fadeTo="#131A2F" />}
             />
           ) : (
-            <SceneArt draft={story.draft} visual={scene.visual} motion={scene.motion} style={styles.art} fadeTo="#131A2F" />
+            <SceneArt draft={story.draft} visual={scene.visual} motion={scene.motion} atmosphere={scene.atmosphere} style={styles.art} fadeTo="#131A2F" />
           )}
           <View style={styles.head}>
             <AppText variant="caption" center color={accent}>

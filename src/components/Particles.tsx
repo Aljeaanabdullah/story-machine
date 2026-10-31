@@ -12,7 +12,13 @@ import Animated, {
 
 import { colors } from '@/theme';
 
-type Props = { count?: number; calm?: boolean; tint?: string };
+type Props = {
+  count?: number;
+  calm?: boolean;
+  tint?: string;
+  /** Confine motes to a box (e.g. a scene image) instead of the whole window. */
+  area?: { width: number; height: number };
+};
 
 /** Deterministic pseudo-random so particles don't jump around between renders. */
 function seeded(i: number) {
@@ -52,14 +58,15 @@ function Mote({ index, width, height, tint }: { index: number; width: number; he
   );
 }
 
-function ParticlesBase({ count = 14, calm, tint = colors.gold }: Props) {
-  const { width, height } = useWindowDimensions();
+function ParticlesBase({ count = 14, calm, tint = colors.gold, area }: Props) {
+  const win = useWindowDimensions();
+  const { width, height } = area ?? win;
   const items = useMemo(() => Array.from({ length: count }, (_, i) => i), [count]);
   if (calm) return null;
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       {items.map((i) => (
-        <Mote key={i} index={i} width={width} height={height} tint={i % 3 === 0 ? colors.blue : tint} />
+        <Mote key={i} index={i} width={width} height={height} tint={i % 3 === 0 && !area ? colors.blue : tint} />
       ))}
     </View>
   );

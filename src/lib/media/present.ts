@@ -2,6 +2,7 @@ import { findWorld, GENRES, MOODS, nameOf } from '@/data/catalog';
 import { buildSegments } from '@/lib/audio/dialogue';
 import { splitParagraphs, splitSentences } from '@/lib/audio/segment';
 import { pickAmbience, type Ambience } from '@/lib/audio/sfx';
+import { atmosphereFor, type Atmosphere } from './atmosphere';
 import type { VoiceSegment } from '@/lib/audio/types';
 import type { Scene, Story, StoryDraft } from '@/lib/story/types';
 import type { CameraMove, MotionHint, SceneMedia, SceneTransition, SceneVideo, SceneVisual } from './types';
@@ -16,6 +17,8 @@ export type ScenePresentation = {
   segments: VoiceSegment[];
   /** Background sound bed while the scene is narrated. */
   ambience: Ambience | null;
+  /** Fog and light motes layered over the image. */
+  atmosphere: Atmosphere;
   visual: SceneVisual;
   motion: MotionHint;
   video: SceneVideo;
@@ -82,6 +85,7 @@ function present(story: Story, key: string, number: number, title: string, text:
     visual: { slot: artSlotFor(story.draft), status: 'placeholder' as const, prompt: imagePrompt(story.draft, title, text) },
     motion: defaultMotion(story.draft, number, isEnding),
   };
+  const ambience = pickAmbience(text, story.draft);
   return {
     key,
     number,
@@ -89,7 +93,8 @@ function present(story: Story, key: string, number: number, title: string, text:
     isEnding,
     paragraphs: splitParagraphs(text),
     segments: buildSegments(text, story.draft, multiVoice),
-    ambience: pickAmbience(text, story.draft),
+    ambience,
+    atmosphere: atmosphereFor(story.draft, ambience),
     ...resolveMedia(base, media),
   };
 }
