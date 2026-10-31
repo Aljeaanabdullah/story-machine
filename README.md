@@ -17,7 +17,7 @@ Expo Router. Stories are generated with free OpenRouter models. Built for the CO
 - **Character voices**: quoted dialogue is split from narration and voiced as narrator, hero, villain or a generic character (English and Arabic). It can be switched to narrator-only in Settings.
 - **Scene model** (`src/lib/media`): each scene has an image slot (world art placeholder plus an image prompt), motion hints, a video slot, and a timeline builder for future video rendering.
 - **Motion**: a slow Ken Burns camera move over scene art, turned off by reduced motion.
-- **Premium voices**: ElevenLabs is stubbed behind a provider interface. It must go through a backend proxy (`EXPO_PUBLIC_TTS_PROXY_URL`); never put an ElevenLabs key in an `EXPO_PUBLIC_*` variable.
+- **Premium voices**: ElevenLabs is stubbed behind a provider interface and stays disabled (see Version 3). Never put an ElevenLabs key in an `EXPO_PUBLIC_*` variable.
 
 Details (Arabic): [docs/REPORT-V2-ar.md](docs/REPORT-V2-ar.md).
 
